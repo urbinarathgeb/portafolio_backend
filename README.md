@@ -17,7 +17,11 @@ pnpm install
 ## Crear base de datos
 
 ```bash
-    CREATE DATABASE portafolio_javier_urbina;
+psql -U TU_USUARIO_PG
+```
+luego 
+```bash
+CREATE DATABASE portafolio_javier_urbina;
 ```
 
 ## Variables de entorno
@@ -53,15 +57,21 @@ pnpm start    # Levanta el servidor en modo producción (NODE_ENV=production)
 
 ```
 src/
-├── app.js                  # Entry point, configuración de Express y middlewares
+├── app.js                          # Entry point, configuración de Express y middlewares
 ├── config/
-│   ├── env.config.js       # Carga y validación de variables de entorno
-│   └── db.config.js        # Configuración de Sequelize y PostgreSQL
+│   ├── env.config.js               # Carga y validación de variables de entorno
+│   └── db.config.js                # Configuración de Sequelize y PostgreSQL
+├── models/
+│   ├── index.js                    # Asociación entre modelos
+│   ├── user.model.js               # Modelo User
+│   └── project.model.js            # Modelo Project
+├── seeders/
+│   └── initial.seed.js             # Datos iniciales de prueba (solo en desarrollo)
 ├── middlewares/
-│   ├── errorHandler.js     # Handler global de errores (AppError vs inesperados)
-│   └── notFound.js         # Middleware para rutas no encontradas (404)
+│   ├── errorHandler.middleware.js   # Handler global de errores (AppError vs inesperados)
+│   └── notFound.middleware.js       # Middleware para rutas no encontradas (404)
 └── utils/
-    └── errors.js           # Clases de error personalizadas
+    └── errors.js                   # Clases de error personalizadas
 ```
 
 ## Manejo de errores
