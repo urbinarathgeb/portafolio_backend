@@ -1,0 +1,34 @@
+import { Sequelize } from 'sequelize';
+import env from './env.config.js';
+
+const sequelize = new Sequelize({
+  dialect: 'postgres',
+  host: env.DB_HOST,
+  port: env.DB_PORT,
+  username: env.DB_USER,
+  password: env.DB_PASSWORD,
+  database: env.DB_DATABASE,
+  logging: env.NODE_ENV === 'development' ? console.log : false,
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+  define: {
+    timestamps: true,
+    underscored: true,
+  },
+});
+
+export const testConnection = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Conexión a PostgreSQL establecida correctamente');
+  } catch (error) {
+    console.error('❌ Error al conectar con PostgreSQL:', error.message);
+    throw error;
+  }
+}
+
+export default sequelize;
