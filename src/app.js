@@ -2,8 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import env from './config/env.config.js';
 import sequelize, { testConnection } from './config/db.config.js';
-import { notFound } from './middlewares/notFound.js';
-import { errorHandler } from './middlewares/errorHandler.js';
+import { notFound } from './middlewares/notFound.middleware.js';
+import { errorHandler } from './middlewares/errorHandler.middleware.js';
+import './models/index.js';
+import {seed} from './seeders/initial.seed.js';
 
 const app = express();
 
@@ -24,9 +26,9 @@ async function start() {
 
 		await sequelize.sync({force: env.NODE_ENV === 'development'});
 
-		// if (env.NODE_ENV === 'development') {
-		// 	await seed();
-		// }
+		if (env.NODE_ENV === 'development') {
+			await seed();
+		}
 
 		app.listen(env.PORT, () => {
 			console.log(`✅ Servidor corriendo en el puerto ${env.PORT}`);
