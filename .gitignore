@@ -2,6 +2,8 @@ node_modules/
 dist/
 build/
 .env
+.env.*
+!.env.example
 .idea/
 .vscode/
 *.log
@@ -9,3 +11,9 @@ build/
 thumbs.db
 coverage/
 .npm/
+
+# Agent/opencode config
+.agents/
+AGENTS.md
+skills-lock.json
+.opencode/
