@@ -53,26 +53,93 @@ pnpm dev      # Levanta el servidor en modo desarrollo (NODE_ENV=development)
 pnpm start    # Levanta el servidor en modo producción (NODE_ENV=production)
 ```
 
+## Endpoints
+
+### Projects
+
+| Método | Ruta | Descripción | Status |
+|---|---|---|---|
+| `GET` | `/projects` | Listar todos los proyectos | 200 |
+| `GET` | `/projects/:id` | Obtener un proyecto por ID | 200 |
+| `POST` | `/projects` | Crear un proyecto | 201 |
+| `PUT` | `/projects/:id` | Actualizar un proyecto | 200 |
+| `DELETE` | `/projects/:id` | Eliminar un proyecto (soft delete) | 200 |
+
+### Formato de respuesta
+
+**Éxito:**
+```json
+{
+  "status": "success",
+  "message": "Descripción en español",
+  "data": { ... }
+}
+```
+
+**Error:**
+```json
+{
+  "status": "error",
+  "message": "Descripción del error en español"
+}
+```
+
+**Error de validación (400):**
+```json
+{
+  "status": "error",
+  "message": "Error de validación",
+  "errors": [
+    { "field": "title", "message": "El campo title es obligatorio" }
+  ]
+}
+```
+
 ## Estructura del proyecto
 
 ```
 src/
-├── app.js                          # Entry point, configuración de Express y middlewares
+├── app.js                              # Entry point, configuración de Express y middlewares
 ├── config/
-│   ├── env.config.js               # Carga y validación de variables de entorno
-│   └── db.config.js                # Configuración de Sequelize y PostgreSQL
-├── models/
-│   ├── index.js                    # Asociación entre modelos
-│   ├── user.model.js               # Modelo User
-│   └── project.model.js            # Modelo Project
-├── seeders/
-│   └── initial.seed.js             # Datos iniciales de prueba (solo en desarrollo)
+│   ├── env.config.js                   # Carga y validación de variables de entorno
+│   └── db.config.js                    # Configuración de Sequelize y PostgreSQL
+├── controllers/
+│   └── project.controller.js           # Handlers de projects (list, detail, create, update, remove)
 ├── middlewares/
-│   ├── errorHandler.middleware.js   # Handler global de errores (AppError vs inesperados)
-│   └── notFound.middleware.js       # Middleware para rutas no encontradas (404)
-└── utils/
-    └── errors.js                   # Clases de error personalizadas
+│   ├── errorHandler.middleware.js      # Handler global de errores (AppError, Sequelize, inesperados)
+│   ├── notFound.middleware.js          # Middleware para rutas no encontradas (404)
+│   └── validate.middleware.js         # Middleware genérico de validación (recibe esquema + fuente)
+├── models/
+│   ├── index.js                        # Asociación entre modelos
+│   ├── user.model.js                   # Modelo User
+│   └── project.model.js               # Modelo Project
+├── routes/
+│   └── project.routes.js              # Rutas de projects con validación
+├── seeders/
+│   └── initial.seed.js                # Datos iniciales de prueba (solo en desarrollo)
+├── services/
+│   └── project.service.js             # Lógica de negocio de projects
+├── utils/
+│   ├── asyncHandler.js                 # Wrapper para capturar errores async
+│   ├── errors.js                      # Clases de error personalizadas
+│   └── response.js                    # Helpers de respuesta estandarizada (success, error)
+└── validations/
+    ├── rules.js                        # Reglas de validación reutilizables (required, isUrl, isInt, optional)
+    └── project.validation.js          # Esquemas de validación de projects (create, update, idParam)
 ```
+
+## Arquitectura
+
+Flujo estricto de dependencias:
+
+```
+Route → Controller → Service → Model
+```
+
+- **Routes:** Definen endpoints y aplican middlewares de validación.
+- **Controllers:** Reciben request/response, orquestan lógica. Solo invocan services.
+- **Services:** Contienen lógica de negocio. Invocan métodos de modelos Sequelize.
+- **Models:** Definiciones Sequelize. No contienen lógica de negocio.
 
 ## Manejo de errores
 
@@ -86,7 +153,19 @@ Se usa una jerarquía de clases de error en `src/utils/errors.js`:
 | `ConflictError` | 409 | Recurso duplicado |
 | `InternalError` | 500 | Error interno |
 
-Los errores operacionales (subclases de `AppError`) se envían al cliente con su status y mensaje. Los errores inesperados devuelven un 500 genérico sin exponer detalles internos.
+El middleware `errorHandler` maneja tres tipos de errores:
+
+1. **`SequelizeValidationError`** → 400 con detalle de campos
+2. **`SequelizeUniqueConstraintError`** → 409 recurso duplicado
+3. **`AppError` (operacional)** → status y mensaje custom
+4. **Errores inesperados** → 500 genérico (detalle y stack solo en desarrollo)
+
+## Validación
+
+Validación en dos capas:
+
+1. **Middleware** (`src/middlewares/validate.middleware.js`): Valida input del request usando esquemas definidos en `src/validations/`. Reglas reutilizables en `src/validations/rules.js`.
+2. **Modelo Sequelize**: Validaciones a nivel BD (`validate` en definición de campos).
 
 ## Stack
 
