@@ -12,24 +12,49 @@ Project.init({
 	},
 	title: {
 		type: DataTypes.STRING(200),
-		allowNull: false
+		allowNull: false,
+		validate: {
+			notEmpty: {
+				msg: 'El título es obligatorio'
+			}
+		}
 	},
 	subtitle: {
 		type: DataTypes.STRING(200),
-		allowNull: false
+		allowNull: false,
+		validate: {
+			notEmpty: {
+				msg: 'El subtítulo es obligatorio'
+			}
+		}
 	},
 	description: {
 		type: DataTypes.TEXT,
-		allowNull: false
+		allowNull: false,
+		validate: {
+			notEmpty: {
+				msg: 'La descripción es obligatoria'
+			}
+		}
 	},
 	imagePreview: {
 		type: DataTypes.STRING(255)
 	},
 	githubURL: {
-		type: DataTypes.STRING(255)
+		type: DataTypes.STRING(255),
+		validate: {
+			isUrl: {
+				msg: 'La URL de GitHub debe ser una URL válida'
+			}
+		}
 	},
 	deployURL: {
-		type: DataTypes.STRING(255)
+		type: DataTypes.STRING(255),
+		validate: {
+			isUrl: {
+				msg: 'La URL de deploy debe ser una URL válida'
+			}
+		}
 	},
 	isFeatured: {
 		type: DataTypes.BOOLEAN,
@@ -37,7 +62,12 @@ Project.init({
 	},
 	userId: {
 		type: DataTypes.INTEGER,
-		allowNull: false
+		allowNull: false,
+		validate: {
+			isInt: {
+				msg: 'El ID de usuario debe ser un número entero'
+			}
+		}
 	}
 }, {
 	sequelize,

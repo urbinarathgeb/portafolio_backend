@@ -12,20 +12,44 @@ User.init({
 	},
 	name: {
 		type: DataTypes.STRING(100),
-		allowNull: false
+		allowNull: false,
+		validate: {
+			notEmpty: {
+				msg: 'El nombre es obligatorio'
+			}
+		}
 	},
 	lastname: {
 		type: DataTypes.STRING(100),
-		allowNull: false
+		allowNull: false,
+		validate: {
+			notEmpty: {
+				msg: 'El apellido es obligatorio'
+			}
+		}
 	},
 	email: {
 		type: DataTypes.STRING(255),
 		allowNull: false,
-		unique: true
+		unique: true,
+		validate: {
+			isEmail: {
+				msg: 'El email debe ser válido'
+			},
+			notEmpty: {
+				msg: 'El email es obligatorio'
+			}
+		}
 	},
 	password: {
 		type: DataTypes.STRING(255),
-		allowNull: false
+		allowNull: false,
+		validate: {
+			len: {
+				args: [8, 255],
+				msg: 'La contraseña debe tener al menos 8 caracteres'
+			}
+		}
 	},
 }, {
 	sequelize,
