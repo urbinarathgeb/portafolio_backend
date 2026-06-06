@@ -2,27 +2,35 @@ import User from '../models/user.model.js'
 import Project from '../models/project.model.js'
 
 const userSeed = {
-	name: 'user',
-	lastname: 'user',
+	name: 'Javier',
+	lastname: 'Urbina',
 	email: 'admin@mail.com',
 	password: 'admin123'
 };
 
 const projectsSeed = [
 	{
-		title: 'Proyecto',
-		subtitle: 'número 1',
-		description: 'Descripción del proyecto 1'
+		title: 'E-Commerce Dashboard',
+		subtitle: 'Panel de administración',
+		description: 'Dashboard interactivo para gestión de productos, pedidos y usuarios con gráficos en tiempo real y sistema de notificaciones.',
+		imagePreview: 'https://res.cloudinary.com/demo/image/upload/ecommerce-dashboard.png',
+		githubURL: 'https://github.com/jurbina/ecommerce-dashboard',
+		deployURL: 'https://ecommerce-dashboard.vercel.app',
+		isFeatured: true
 	},
 	{
-		title: 'Proyecto',
-		subtitle: 'número 2',
-		description: 'Descripción del proyecto 2'
+		title: 'Blog Personal',
+		subtitle: 'CMS con markdown',
+		description: 'Blog personal con soporte para markdown, categorías y sistema de etiquetas. Incluye panel de administración para crear y editar publicaciones.',
+		imagePreview: 'https://res.cloudinary.com/demo/image/upload/personal-blog.png',
+		githubURL: 'https://github.com/jurbina/personal-blog',
+		deployURL: 'https://jurbina-blog.vercel.app',
+		isFeatured: false
 	},
 	{
-		title: 'Proyecto',
-		subtitle: 'número 3',
-		description: 'Descripción del proyecto 3'
+		title: 'Weather App',
+		subtitle: 'Consumo de APIs',
+		description: 'Aplicación del clima que consume multiples APIs para mostrar pronósticos, mapas interactivos y alertas meteorológicas.'
 	}
 ];
 
