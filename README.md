@@ -14,27 +14,19 @@ Backend para el portafolio de Javier Urbina. API REST construida con **Express 5
 pnpm install
 ```
 
-## Crear base de datos
-
-```bash
-psql -U TU_USUARIO_PG
-```
-luego 
-```bash
-CREATE DATABASE portafolio_javier_urbina;
-```
-
 ## Variables de entorno
 
 El proyecto usa tres archivos `.env`:
 
-| Archivo | Propósito |
-|---|---|
-| `.env` | Credenciales de BD y config global |
-| `.env.development` | Puerto y CORS para desarrollo | 
-| `.env.production` | Puerto y CORS para producción |
+| Archivo | Propósito | Carga en |
+|---|---|---|
+| `.env` | Credenciales de BD y config global | Siempre |
+| `.env.development` | Puerto y CORS para desarrollo | `NODE_ENV=development` |
+| `.env.production` | Puerto y CORS para producción | `NODE_ENV=production` |
 
-### Crear un `.env` en la raíz del proyecto con las siguientes variables: 
+### `.env`
+
+Crear un archivo `.env` en la raíz del proyecto:
 
 ```env
 DB_HOST=localhost
@@ -45,6 +37,42 @@ DB_DATABASE=portafolio_javier_urbina
 ALLOW_EXIT_ON_IDLE=true
 ```
 
+### `.env.development`
+
+```env
+PORT=3001
+CORS_ORIGIN=*
+```
+
+### `.env.production`
+
+```env
+PORT=8080
+CORS_ORIGIN=https://tudominio.com
+```
+
+> **Nota sobre el puerto:** El puerto se lee desde el archivo `.env` correspondiente al entorno. El fallback `|| 3000` en el código es intencional — si al arrancar ves el puerto 3000 en vez del configurado, significa que las variables de entorno no se están cargando correctamente.
+
+## Crear base de datos
+
+Opción A — Si ya tienes un usuario de PostgreSQL:
+
+```bash
+psql -U TU_USUARIO_PG
+```
+
+```sql
+CREATE DATABASE portafolio_javier_urbina;
+```
+
+Opción B — Crear un usuario dedicado desde cero:
+
+```sql
+CREATE USER portafolio_user WITH PASSWORD 'tu_password';
+CREATE DATABASE portafolio_javier_urbina OWNER portafolio_user;
+```
+
+Luego actualizar `.env` con las credenciales del usuario creado.
 
 ## Scripts
 
@@ -53,6 +81,17 @@ pnpm dev      # Levanta el servidor en modo desarrollo (NODE_ENV=development)
 pnpm start    # Levanta el servidor en modo producción (NODE_ENV=production)
 ```
 
+> **Nota:** En modo desarrollo (`pnpm dev`), las tablas se recrean y se ejecutan los seeders automáticamente en cada inicio (`sequelize.sync({ force: true })`). En producción solo se crean si no existen.
+
+## Cómo probar
+
+El proyecto incluye archivos de requests para testing manual en `requests/`:
+
+- `project.request.http` — Compatible con la extensión **REST Client** de VS Code
+- `project.request.rest` — Compatible con **IntelliJ HTTP Client** (WebStorm, IntelliJ)
+
+Ambos archivos contienen los mismos 14 requests cubriendo todos los endpoints del CRUD y casos de error.
+
 ## Endpoints
 
 ### Projects
@@ -60,10 +99,10 @@ pnpm start    # Levanta el servidor en modo producción (NODE_ENV=production)
 | Método | Ruta | Descripción | Status |
 |---|---|---|---|
 | `GET` | `/projects` | Listar todos los proyectos | 200 |
-| `GET` | `/projects/:id` | Obtener un proyecto por ID | 200 |
-| `POST` | `/projects` | Crear un proyecto | 201 |
-| `PUT` | `/projects/:id` | Actualizar un proyecto | 200 |
-| `DELETE` | `/projects/:id` | Eliminar un proyecto (soft delete) | 200 |
+| `GET` | `/projects/:id` | Obtener un proyecto por ID | 200 / 404 |
+| `POST` | `/projects` | Crear un proyecto | 201 / 400 |
+| `PUT` | `/projects/:id` | Actualizar un proyecto | 200 / 404 |
+| `DELETE` | `/projects/:id` | Eliminar un proyecto (soft delete) | 200 / 404 |
 
 ### Formato de respuesta
 
@@ -73,6 +112,15 @@ pnpm start    # Levanta el servidor en modo producción (NODE_ENV=production)
   "status": "success",
   "message": "Descripción en español",
   "data": { ... }
+}
+```
+
+**Éxito con código personalizado (DELETE):**
+```json
+{
+  "status": "success",
+  "code": "PROJECT_DELETED",
+  "message": "Proyecto eliminado correctamente"
 }
 ```
 
@@ -108,11 +156,11 @@ src/
 ├── middlewares/
 │   ├── errorHandler.middleware.js      # Handler global de errores (AppError, Sequelize, inesperados)
 │   ├── notFound.middleware.js          # Middleware para rutas no encontradas (404)
-│   └── validate.middleware.js         # Middleware genérico de validación (recibe esquema + fuente)
+│   └── validate.middleware.js          # Middleware genérico de validación (recibe esquema + fuente)
 ├── models/
 │   ├── index.js                        # Asociación entre modelos
 │   ├── user.model.js                   # Modelo User
-│   └── project.model.js               # Modelo Project
+│   └── project.model.js                # Modelo Project
 ├── routes/
 │   └── project.routes.js              # Rutas de projects con validación
 ├── seeders/
@@ -153,7 +201,7 @@ Se usa una jerarquía de clases de error en `src/utils/errors.js`:
 | `ConflictError` | 409 | Recurso duplicado |
 | `InternalError` | 500 | Error interno |
 
-El middleware `errorHandler` maneja tres tipos de errores:
+El middleware `errorHandler` maneja los siguientes tipos de errores:
 
 1. **`SequelizeValidationError`** → 400 con detalle de campos
 2. **`SequelizeUniqueConstraintError`** → 409 recurso duplicado
