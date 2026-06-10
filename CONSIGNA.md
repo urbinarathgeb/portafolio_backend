@@ -1,16 +1,14 @@
-#m7
-# Módulo 8 - Aprendizaje esperado nº2
+# Módulo 8 - Aprendizaje esperado nº3
 
-## Optimización API REST Express
+## Subir archivos con NodeJS
 
 ### Descripción
 
-Implementar un servidor REST utilizando el framework Express para la disponibilización de recursos acorde a las buenas prácticas.
+Implementar la funcionalidad de subida de archivos a un servidor utilizando Express, de acuerdo al entorno Node.js.
 
 
 ### Instrucciones específicas
 
 - Tome como base el código trabajado en clases.
-- Según lo visto en clases, maneje errores al enviar el request `POST`.
-- Según lo visto en clases, agregue los estados a cada petición (`GET`, `POST`, `PUT`, `DELETE`).
-- Según lo visto en clases, agregue un código personalizado para `DELETE`.
+- Crea un endpoint GET en la ruta /files que lea el contenido de la carpeta uploads y retorne en formato JSON el listado de archivos almacenados.
+- Modifique su endpoint de subida y limite el tamaño del archivo permitido a 20MB.

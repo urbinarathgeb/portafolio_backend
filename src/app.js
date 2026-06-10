@@ -7,6 +7,7 @@ import { errorHandler } from './middlewares/errorHandler.middleware.js';
 import './models/index.js';
 import {seed} from './seeders/initial.seed.js';
 import projectRoutes from './routes/project.routes.js';
+import fileRoutes from './routes/file.routes.js';
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 
 // Rutas
 app.use('/', projectRoutes);
+app.use('/files', fileRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
