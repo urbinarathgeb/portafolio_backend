@@ -3,6 +3,7 @@ dist/
 build/
 .env
 .env.*
+.rest-client.env.json
 !.env.example
 !.env.development
 !.env.production
