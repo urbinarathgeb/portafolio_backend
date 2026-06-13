@@ -7,43 +7,49 @@ import { errorHandler } from './middlewares/errorHandler.middleware.js';
 import './models/index.js';
 import {seed} from './seeders/initial.seed.js';
 import projectRoutes from './routes/project.routes.js';
-import fileRoutes from './routes/file.routes.js';
+import authRoutes from './routes/auth.routes.js';
+import contactRoutes from './routes/contact.routes.js';
+import serviceRoutes from './routes/service.routes.js';
+import projectImageRoutes from './routes/projectImage.routes.js';
 
 const app = express();
 
 app.use(cors({
-	origin: env.CORS_ORIGIN,
+  origin: env.CORS_ORIGIN,
 }));
 
 app.use(express.json());
 
 // Rutas
+app.use('/', authRoutes);
 app.use('/', projectRoutes);
-app.use('/files', fileRoutes);
+app.use('/', contactRoutes);
+app.use('/', serviceRoutes);
+app.use('/', projectImageRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
 async function start() {
-	try {
-		await testConnection();
+  try {
+    await testConnection();
 
-		await sequelize.sync({force: env.NODE_ENV === 'development'});
+    await sequelize.sync({force: env.NODE_ENV === 'development'});
 
-		if (env.NODE_ENV === 'development') {
-			await seed();
-		}
+    if (env.NODE_ENV === 'development') {
+      await seed();
+    }
 
-		app.listen(env.PORT, () => {
-			console.log(`✅ Servidor corriendo en el puerto ${env.PORT}`);
-		});
-	} catch (error) {
-		console.error('❌ No se pudo iniciar el servidor:', error.message);
-		process.exit(1);
-	}
+    app.listen(env.PORT, () => {
+      console.log(`✅ Servidor corriendo en el puerto ${env.PORT}`);
+    });
+  } catch (error) {
+    console.error('❌ No se pudo iniciar el servidor:', error.message);
+    process.exit(1);
+  }
 }
 
 start().catch((error) => {
-	console.error('❌ Error fatal:', error);
-	process.exit(1);
+  console.error('❌ Error fatal:', error);
+  process.exit(1);
 });
