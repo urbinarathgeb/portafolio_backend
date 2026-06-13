@@ -1,33 +1,25 @@
 import multer from 'multer';
 
-const ALLOWED_MIMES = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'application/pdf',
-];
+const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 
 const storage = multer.memoryStorage();
 
-const fileFilter = (_req, file, cb) => {
-  if (ALLOWED_MIMES.includes(file.mimetype)) {
+const imageFilter = (_req, file, cb) => {
+  if (IMAGE_MIMES.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    const error = new Error(`Tipo de archivo no permitido: ${file.mimetype}`);
+    const error = new Error('Solo se permiten imágenes (JPEG, PNG, WebP)');
     error.name = 'FileFilterError';
     cb(error, false);
   }
 };
 
-const upload = multer({
+const uploadImageOnly = multer({
   storage,
-  fileFilter,
+  fileFilter: imageFilter,
   limits: {
-    fileSize: 20 * 1024 * 1024, // 20MB
+    fileSize: 2 * 1024 * 1024,
   },
 });
 
-export const uploadSingle = upload.single('file');
-
-export default upload;
+export const uploadSingleImage = uploadImageOnly.single('image');
