@@ -1,0 +1,60 @@
+@baseURL = http://localhost:3001
+
+// ─────────────────────────────────────────────────────
+// Para el request privado (### 5):
+// - WebStorm: ejecuta "Login exitoso" en auth.request.http
+//   y {{token}} se asigna automáticamente
+// - VS Code: pega el token en .rest-client.env.json
+// ─────────────────────────────────────────────────────
+
+### 1. Enviar mensaje de contacto (público)
+POST {{baseURL}}/contacts
+Content-Type: application/json
+
+{
+  "name": "María García",
+  "email": "maria@example.com",
+  "message": "Hola Javier, me interesa tu trabajo. ¿Tienes disponibilidad para un proyecto?"
+}
+
+### 2. Enviar otro mensaje de contacto
+POST {{baseURL}}/contacts
+Content-Type: application/json
+
+{
+  "name": "Carlos López",
+  "email": "carlos@example.com",
+  "message": "Excelente portafolio, me gustaría contactarte para una colaboración."
+}
+
+### 3. Error: campos obligatorios vacíos
+POST {{baseURL}}/contacts
+Content-Type: application/json
+
+{
+  "name": "",
+  "email": "",
+  "message": ""
+}
+
+### 4. Error: email inválido
+POST {{baseURL}}/contacts
+Content-Type: application/json
+
+{
+  "name": "Pedro",
+  "email": "no-es-email",
+  "message": "Mensaje de prueba"
+}
+
+### 5. Listar mensajes (privado - requiere token)
+GET {{baseURL}}/contacts
+Authorization: Bearer {{token}}
+
+### 6. Marcar mensaje como leído (privado - requiere token)
+PATCH {{baseURL}}/contacts/3
+Authorization: Bearer {{token}}
+
+### 7. Error: marcar mensaje inexistente
+PATCH {{baseURL}}/contacts/999
+Authorization: Bearer {{token}}

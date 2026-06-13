@@ -1,0 +1,63 @@
+@baseURL = http://localhost:3001
+
+// ─────────────────────────────────────────────────────
+// Estos requests requieren {{token}}:
+// - WebStorm: ejecuta "Login exitoso" en auth.request.http
+//   y {{token}} se asigna automáticamente
+// - VS Code: pega el token en .rest-client.env.json
+// ─────────────────────────────────────────────────────
+
+### 1. Crear servicio
+POST {{baseURL}}/services
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Desarrollo Web Full Stack",
+  "description": "Creación de aplicaciones web completas con React, Node.js y PostgreSQL."
+}
+
+### 2. Crear otro servicio
+POST {{baseURL}}/services
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Consultoría Técnica",
+  "description": "Asesoría en arquitectura de software, revisión de código y optimización de rendimiento.",
+  "icon": "consulting"
+}
+
+### 3. Crear servicio sin auth (error 401)
+POST {{baseURL}}/services
+Content-Type: application/json
+
+{
+  "title": "Sin token",
+  "description": "No debería crearse"
+}
+
+### 4. Listar servicios (privado)
+GET {{baseURL}}/services
+Authorization: Bearer {{token}}
+
+### 5. Obtener servicio por ID
+GET {{baseURL}}/services/1
+Authorization: Bearer {{token}}
+
+### 6. Obtener servicio que no existe
+GET {{baseURL}}/services/9999
+Authorization: Bearer {{token}}
+
+### 7. Actualizar servicio
+PUT {{baseURL}}/services/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Desarrollo Full Stack Actualizado"
+}
+
+### 8. Eliminar servicio
+DELETE {{baseURL}}/services/1
+Authorization: Bearer {{token}}

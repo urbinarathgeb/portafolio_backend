@@ -1,0 +1,128 @@
+@baseURL = http://localhost:3001
+
+// ─────────────────────────────────────────────────────
+// Todos estos requests requieren {{token}}:
+// - WebStorm: ejecuta "Login exitoso" en auth.request.http
+//   y {{token}} se asigna automáticamente
+// - VS Code: pega el token en .rest-client.env.json
+//
+// Para pruebas de subida, se usan las imágenes locales:
+//   pikachu.png (PNG válido)
+//   charmander.webp (WebP válido)
+// ─────────────────────────────────────────────────────
+
+### 1. Listar todas las imágenes (privado)
+GET {{baseURL}}/images
+Authorization: Bearer {{token}}
+
+### 2. Listar imágenes de un proyecto existente (privado)
+GET {{baseURL}}/projects/1/images
+Authorization: Bearer {{token}}
+
+### 3. Listar imágenes de un proyecto que no existe (404)
+GET {{baseURL}}/projects/9999/images
+Authorization: Bearer {{token}}
+
+### 4. Subir imagen PNG a proyecto 1 (éxito)
+POST {{baseURL}}/projects/2/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=img
+
+--img
+Content-Disposition: form-data; name="image"; filename="pikachu.png"
+Content-Type: image/png
+
+< ./pikachu.png
+--img--
+
+### 5. Subir imagen WebP a proyecto 1 (éxito)
+POST {{baseURL}}/projects/3/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=img
+
+--img
+Content-Disposition: form-data; name="image"; filename="charmander.webp"
+Content-Type: image/webp
+
+< ./charmander.webp
+--img--
+
+### 6. Subir imagen a proyecto que no existe (404)
+POST {{baseURL}}/projects/9999/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=img
+
+--img
+Content-Disposition: form-data; name="image"; filename="pikachu.png"
+Content-Type: image/png
+
+< ./pikachu.png
+--img--
+
+### 7. Subir imagen sin autenticación (401)
+POST {{baseURL}}/projects/1/images
+Content-Type: multipart/form-data; boundary=img
+
+--img
+Content-Disposition: form-data; name="image"; filename="pikachu.png"
+Content-Type: image/png
+
+< ./pikachu.png
+--img--
+
+### 8. Error: formato no permitido (FileFilterError - 400)
+POST {{baseURL}}/projects/1/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=img
+
+--img
+Content-Disposition: form-data; name="image"; filename="documento.pdf"
+Content-Type: application/pdf
+
+// Solo se permiten imágenes JPEG, PNG, WebP
+// WebStorm: prueba con un archivo .pdf real
+// VS Code: prueba con un archivo .pdf real
+--img--
+
+### 9. Error: archivo excede 2MB (LIMIT_FILE_SIZE - 400)
+POST {{baseURL}}/projects/1/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=img
+
+--img
+Content-Disposition: form-data; name="image"; filename="large-image.jpg"
+Content-Type: image/jpeg
+
+// Genera una imagen de más de 2MB para probar
+--img--
+
+### 10. Error: param id no es entero (validation error - 400)
+POST {{baseURL}}/projects/abc/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=img
+
+--img
+Content-Disposition: form-data; name="image"; filename="pikachu.png"
+Content-Type: image/png
+
+< ./pikachu.png
+--img--
+
+### 11. Error: id negativo (validation error - 400)
+POST {{baseURL}}/projects/-1/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=img
+
+--img
+Content-Disposition: form-data; name="image"; filename="pikachu.png"
+Content-Type: image/png
+
+< ./pikachu.png
+--img--
+
+### 12. Verificar proyecto 1 ahora incluye imágenes en su respuesta
+GET {{baseURL}}/projects/1
+
+### 13. Listar todas las imágenes (verificar las subidas)
+GET {{baseURL}}/images
+Authorization: Bearer {{token}}
