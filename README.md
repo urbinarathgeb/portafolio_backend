@@ -40,6 +40,10 @@ ALLOW_EXIT_ON_IDLE=true
 CLOUDINARY_CLOUD_NAME=tu_cloud_name
 CLOUDINARY_API_KEY=tu_api_key
 CLOUDINARY_API_SECRET=tu_api_secret
+
+# JWT
+JWT_SECRET=tu_secret_super_seguro
+JWT_EXPIRES_IN=24h
 ```
 
 ### `.env.development`
@@ -90,54 +94,98 @@ pnpm start    # Levanta el servidor en modo producción (NODE_ENV=production)
 
 ## Cómo probar
 
-El proyecto incluye archivos de requests para testing manual en `requests/`:
+El proyecto incluye archivos `.http` para testing manual en `requests/`. Compatibles con **WebStorm** (HTTP Client) y **VS Code** (REST Client).
 
-- `project.request.http` / `project.request.rest` — CRUD de projects (14 requests)
-- `file.request.http` / `file.request.rest` — Subida y listado de archivos (5 requests)
+### Obtener el token JWT
 
-> **Nota:** Para probar la subida de archivos, coloca tus archivos dentro de la carpeta `requests/` y ajusta las rutas según tus archivos reales.
->
-> **Alternativa rápida con curl** (no necesitas editar nada, solo cambia la ruta):
-> ```bash
-> curl -X POST http://localhost:3001/files \
->   -F "file=@/ruta/completa/hacia/tu/imagen.jpg" \
->   -w "\nHTTP %{http_code}\n"
-> ```
-> Con `curl` el nombre del archivo se toma automáticamente, no necesitas tocar nada.
+**WebStorm:** Ejecuta "### 2. Login exitoso" en `auth.request.http`. El token se asigna automáticamente a `{{token}}` vía `client.global.set()`.
+
+**VS Code:** Ejecuta "### 2. Login exitoso" en `auth.request.http`, copia el token de la respuesta y pégalo en `{{token}}`. Crea un archivo `.rest-client.env.json` a partir de `.rest-client.env.json.template` con el token y selecciona environment "dev".
+
+### Archivos disponibles
+
+- `auth.request.http` — Login y about (5 requests)
+- `project.request.http` — CRUD de projects (14 requests, GET públicos, POST/PUT/DELETE con JWT)
+- `projectImage.request.http` — Subida y listado de imágenes (13 requests, todos con JWT)
+- `contact.request.http` — Contacto público y listado privado (5 requests)
+- `service.request.http` — CRUD de servicios con JWT (8 requests)
+
+## Adaptación de la consigna (Módulo 8)
+
+Este backend adapta los requerimientos de una clínica médica a un **portafolio personal**. Cada punto de la consigna tiene un símil directo:
+
+| # | Consigna (clínica) | Adaptación (portafolio) | Endpoint | Acceso |
+|---|---|---|---|---|
+| 1 | `POST /api/login` | Login del admin | `POST /auth/login` | Público |
+| 2 | `GET /about` | Información pública de la API | `GET /about` | Público |
+| 3 | Listar pacientes (privado) | Listar mensajes de contacto | `GET /contacts` | Privado (JWT) |
+| 4 | Listar médicos (privado) | Listar servicios ofrecidos | `GET /services` | Privado (JWT) |
+| 5 | Subir exámenes (solo PDF) | Subir imágenes de proyectos (solo imágenes) | `POST /projects/:id/images` | Privado (JWT) |
+| 6 | Listar archivos subidos (privado) | Listar imágenes subidas | `GET /images` | Privado (JWT) |
 
 ## Endpoints
 
-### Projects
+### Auth
 
 | Método | Ruta | Descripción | Status |
 |---|---|---|---|
-| `GET` | `/projects` | Listar todos los proyectos | 200 |
-| `GET` | `/projects/:id` | Obtener un proyecto por ID | 200 / 404 |
-| `POST` | `/projects` | Crear un proyecto | 201 / 400 |
-| `PUT` | `/projects/:id` | Actualizar un proyecto | 200 / 404 |
-| `DELETE` | `/projects/:id` | Eliminar un proyecto (soft delete) | 200 / 404 |
+| `POST` | `/auth/login` | Iniciar sesión (devuelve JWT) | 200 / 400 / 401 |
+| `GET` | `/about` | Información pública de la API | 200 |
 
-### Files
+> Endpoints protegidos requieren header: `Authorization: Bearer <token>`
+>
+> **Seguridad:** `POST /auth/login` retorna siempre `"Credenciales inválidas"` tanto para email no registrado como para contraseña incorrecta, para evitar email enumeration.
 
-| Método | Ruta | Middlewares | Descripción | Status |
-|--------|------|------------|-------------|--------|
-| `POST` | `/files` | `uploadSingle` (multer) | Subir un archivo a Cloudinary (max 20MB) | 201 / 400 |
-| `GET` | `/files` | — | Listar archivos subidos a Cloudinary | 200 |
+### Projects
 
-> ⚠️ **Importante:** El `filename` del `Content-Disposition` en el multipart debe coincidir con el nombre real del archivo. Ese valor es el `originalName` que Cloudinary usará como identificador en la nube.
+| Método | Ruta | Descripción | Status | Acceso |
+|---|---|---|---|---|
+| `GET` | `/projects` | Listar todos los proyectos | 200 | Público |
+| `GET` | `/projects/:id` | Obtener un proyecto por ID (incluye imágenes) | 200 / 404 | Público |
+| `POST` | `/projects` | Crear un proyecto | 201 / 400 | Privado (JWT) |
+| `PUT` | `/projects/:id` | Actualizar un proyecto | 200 / 404 | Privado (JWT) |
+| `DELETE` | `/projects/:id` | Eliminar un proyecto (soft delete) | 200 / 404 | Privado (JWT) |
 
-**POST /files** — Enviar como `multipart/form-data` con el campo `file`:
+### Contacts
+
+| Método | Ruta | Descripción | Status | Acceso |
+|---|---|---|---|---|
+| `POST` | `/contacts` | Enviar un mensaje de contacto | 201 / 400 | Público |
+| `GET` | `/contacts` | Listar todos los mensajes de contacto | 200 | Privado (JWT) |
+| `PATCH` | `/contacts/:id` | Marcar mensaje como leído | 200 / 404 | Privado (JWT) |
+
+### Services
+
+| Método | Ruta | Descripción | Status | Acceso |
+|---|---|---|---|---|
+| `GET` | `/services` | Listar todos los servicios | 200 | Privado (JWT) |
+| `GET` | `/services/:id` | Obtener un servicio por ID | 200 / 404 | Privado (JWT) |
+| `POST` | `/services` | Crear un servicio | 201 / 400 | Privado (JWT) |
+| `PUT` | `/services/:id` | Actualizar un servicio | 200 / 404 | Privado (JWT) |
+| `DELETE` | `/services/:id` | Eliminar un servicio (soft delete) | 200 / 404 | Privado (JWT) |
+
+### Project Images (protegido)
+
+| Método | Ruta | Descripción | Status |
+|---|---|---|---|
+| `GET` | `/images` | Listar todas las imágenes subidas | 200 |
+| `GET` | `/projects/:id/images` | Listar imágenes de un proyecto | 200 / 404 |
+| `POST` | `/projects/:id/images` | Subir imagen a un proyecto (solo jpg/png/webp) | 201 / 400 |
+
+**POST /projects/:id/images** — Enviar como `multipart/form-data` con el campo `image`:
 
 ```json
 {
   "status": "success",
-  "message": "Archivo subido correctamente",
+  "message": "Imagen subida correctamente",
   "data": {
+    "id": 1,
+    "projectId": 1,
     "url": "https://res.cloudinary.com/...",
-    "publicId": "portafolio-javierUrbina/imagen",
+    "publicId": "portafolio-javierUrbina/projects/1/imagen",
+    "originalName": "imagen.jpg",
     "format": "jpg",
-    "bytes": 123456,
-    "originalName": "imagen.jpg"
+    "bytes": 123456
   }
 }
 ```
@@ -191,32 +239,48 @@ src/
 │   ├── db.config.js                    # Configuración de Sequelize y PostgreSQL
 │   └── cloudinary.config.js            # Configuración del SDK de Cloudinary
 ├── controllers/
-│   ├── project.controller.js           # Handlers de projects (list, detail, create, update, remove)
-│   └── file.controller.js              # Handlers de files (upload, list)
+│   ├── auth.controller.js              # Handlers de autenticación (login)
+│   ├── project.controller.js           # Handlers de projects (CRUD)
+│   ├── contact.controller.js           # Handlers de contacts (list, create)
+│   ├── service.controller.js           # Handlers de services (CRUD)
+│   └── projectImage.controller.js      # Handlers de imágenes (listAll, listByProject, upload)
 ├── middlewares/
+│   ├── authenticate.middleware.js      # Middleware de verificación JWT
 │   ├── errorHandler.middleware.js      # Handler global de errores (AppError, Sequelize, MulterError, inesperados)
 │   ├── notFound.middleware.js          # Middleware para rutas no encontradas (404)
-│   ├── upload.middleware.js            # Configuración de multer (memoryStorage, 20MB, filtro de tipos)
+│   ├── upload.middleware.js            # Configuración de multer (memoryStorage, 2MB, filtro de tipos)
 │   └── validate.middleware.js          # Middleware genérico de validación (recibe esquema + fuente)
 ├── models/
 │   ├── index.js                        # Asociación entre modelos
 │   ├── user.model.js                   # Modelo User
-│   └── project.model.js                # Modelo Project
+│   ├── project.model.js                # Modelo Project
+│   ├── projectImage.model.js           # Modelo ProjectImage
+│   ├── contact.model.js                # Modelo Contact
+│   └── service.model.js                # Modelo Service
 ├── routes/
+│   ├── auth.routes.js                  # Rutas de autenticación (POST /login, GET /about)
 │   ├── project.routes.js               # Rutas de projects con validación
-│   └── file.routes.js                  # Rutas de files (POST /, GET /)
+│   ├── contact.routes.js               # Rutas de contacts
+│   ├── service.routes.js               # Rutas de services
+│   └── projectImage.routes.js          # Rutas de imágenes (GET /images, GET/POST /projects/:id/images)
 ├── seeders/
 │   └── initial.seed.js                # Datos iniciales de prueba (solo en desarrollo)
 ├── services/
+│   ├── auth.service.js                 # Lógica de autenticación (login, verificación JWT)
 │   ├── project.service.js              # Lógica de negocio de projects
-│   └── file.service.js                 # Lógica de subida y listado de archivos via Cloudinary
+│   ├── contact.service.js              # Lógica de negocio de contacts
+│   ├── service.service.js              # Lógica de negocio de services
+│   └── projectImage.service.js         # Lógica de subida a Cloudinary + persistencia en BD
 ├── utils/
 │   ├── asyncHandler.js                 # Wrapper para capturar errores async
 │   ├── errors.js                      # Clases de error personalizadas
-│   └── response.js                    # Helpers de respuesta estandarizada (success, error)
+│   └── response.js                    # Helper de respuesta estandarizada (success)
 └── validations/
     ├── rules.js                        # Reglas de validación reutilizables (required, isUrl, isInt, optional)
-    └── project.validation.js          # Esquemas de validación de projects (create, update, idParam)
+    ├── auth.validation.js              # Esquemas de validación de autenticación
+    ├── contact.validation.js           # Esquemas de validación de contacts
+    ├── project.validation.js           # Esquemas de validación de projects
+    └── service.validation.js           # Esquemas de validación de services
 ```
 
 ## Arquitectura
@@ -270,3 +334,5 @@ Validación en dos capas:
 - **cross-env** - Compatibilidad cross-platform para NODE_ENV
 - **multer** - Middleware para subida de archivos (multipart/form-data)
 - **cloudinary** - SDK para almacenamiento y administración de archivos en Cloudinary
+- **jsonwebtoken** - Generación y verificación de tokens JWT
+- **bcrypt** - Hashing de contraseñas
