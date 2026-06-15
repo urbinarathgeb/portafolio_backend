@@ -16,7 +16,7 @@ coverage/
 .npm/
 
 # Agent/opencode config
-#.agents/
-#AGENTS.md
-#skills-lock.json
-#.opencode/
+.agents/
+AGENTS.md
+skills-lock.json
+.opencode/
