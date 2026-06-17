@@ -1,8 +1,10 @@
 import Technology from '../models/technology.model.js';
 import { NotFoundError } from '../utils/errors.js';
 
-export const getAll = async () => {
-  return await Technology.findAll({ order: [['name', 'ASC']] });
+export const getAll = async (query = {}) => {
+  const where = {};
+  if (query.stack === 'true') where.showInStack = true;
+  return await Technology.findAll({ where, order: [['name', 'ASC']] });
 };
 
 export const getById = async (id) => {

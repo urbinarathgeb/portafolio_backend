@@ -17,28 +17,28 @@ ProjectImage.belongsTo(Project, {foreignKey: 'projectId', as: 'project'});
 // Experience ↔ Technology (M:N)
 Experience.belongsToMany(Technology, {
   through: ExperienceTechnology,
-  foreignKey: 'experience_id',
-  otherKey: 'technology_id',
+  foreignKey: 'experienceId',
+  otherKey: 'technologyId',
   as: 'technologies',
 });
 Technology.belongsToMany(Experience, {
   through: ExperienceTechnology,
-  foreignKey: 'technology_id',
-  otherKey: 'experience_id',
+  foreignKey: 'technologyId',
+  otherKey: 'experienceId',
   as: 'experiences',
 });
 
 // Project ↔ Technology (M:N)
 Project.belongsToMany(Technology, {
   through: ProjectTechnology,
-  foreignKey: 'project_id',
-  otherKey: 'technology_id',
+  foreignKey: 'projectId',
+  otherKey: 'technologyId',
   as: 'techStackDetails',
 });
 Technology.belongsToMany(Project, {
   through: ProjectTechnology,
-  foreignKey: 'technology_id',
-  otherKey: 'project_id',
+  foreignKey: 'technologyId',
+  otherKey: 'projectId',
   as: 'projects',
 });
 

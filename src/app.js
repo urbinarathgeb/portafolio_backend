@@ -13,6 +13,7 @@ import serviceRoutes from './routes/service.routes.js';
 import projectImageRoutes from './routes/projectImage.routes.js';
 import experienceRoutes from './routes/experience.routes.js';
 import technologyRoutes from './routes/technology.routes.js';
+import profileRoutes from './routes/profile.routes.js';
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/', serviceRoutes);
 app.use('/', projectImageRoutes);
 app.use('/', experienceRoutes);
 app.use('/', technologyRoutes);
+app.use('/', profileRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

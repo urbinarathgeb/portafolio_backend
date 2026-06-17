@@ -9,7 +9,14 @@ const userSeed = {
   name: 'Javier',
   lastname: 'Urbina',
   email: 'admin@mail.com',
-  password: 'admin123'
+  password: 'admin123',
+  title: 'Desarrollador Full-Stack',
+  tagline: 'CÓDIGO. DISEÑO. INNOVAR.',
+  heroDescription: 'Construyo productos web rápidos, limpios y escalables. Del diseño de base de datos a la interfaz que se ve viva.',
+  bio: 'Puenteo la brecha entre la ingeniería compleja y el diseño emotivo. Mi trabajo vive en la intersección de la precisión técnica y la narrativa visual, creando experiencias digitales que son tan performantes como hermosas.',
+  availability: true,
+  location: 'Santiago, Chile',
+  avatar: null,
 };
 
 const projectsSeed = [
@@ -79,21 +86,21 @@ const servicesSeed = [
 ];
 
 const technologiesSeed = [
-  { name: 'Vue.js', category: 'Frontend Framework', description: 'Framework progresivo para construir interfaces de usuario.', icon: 'i-lucide-code-2', span: 4 },
-  { name: 'TypeScript', category: 'Language', description: 'Superset tipado de JavaScript que compila a JS limpio.', icon: 'i-lucide-braces', span: 8 },
-  { name: 'Tailwind CSS', category: 'Styling Engine', description: 'Framework CSS utility-first para diseño rápido.', icon: 'i-lucide-palette', span: 7 },
-  { name: 'Nuxt', category: 'Full-Stack Framework', description: 'Framework de Vue.js para aplicaciones universales.', icon: 'i-lucide-layers', span: 5 },
-  { name: 'Node.js', category: 'Runtime', description: 'Entorno de ejecución para JavaScript del lado del servidor.', icon: 'i-lucide-terminal', span: 5 },
-  { name: 'PostgreSQL', category: 'Database', description: 'Sistema de base de datos relacional objeto-orientado.', icon: 'i-lucide-database', span: 7 },
-  { name: 'React', category: 'Frontend Library', description: 'Biblioteca para construir interfaces de usuario interactivas.', icon: 'i-lucide-atom', span: 5 },
-  { name: 'Next.js', category: 'Full-Stack Framework', description: 'Framework de React con renderizado híbrido y estático.', icon: 'i-lucide-globe', span: 5 },
-  { name: 'JavaScript', category: 'Language', description: 'Lenguaje de programación multiplataforma y orientado a objetos.', icon: 'i-lucide-file-type', span: 8 },
-  { name: 'Express', category: 'Backend Framework', description: 'Framework web minimalista para Node.js.', icon: 'i-lucide-server', span: 5 },
+  { name: 'Vue.js', category: 'Frontend Framework', description: 'Framework progresivo para construir interfaces de usuario.', icon: 'i-lucide-code-2', span: 4, showInStack: true },
+  { name: 'TypeScript', category: 'Language', description: 'Superset tipado de JavaScript que compila a JS limpio.', icon: 'i-lucide-braces', span: 8, showInStack: true },
+  { name: 'Tailwind CSS', category: 'Styling Engine', description: 'Framework CSS utility-first para diseño rápido.', icon: 'i-lucide-palette', span: 7, showInStack: true },
+  { name: 'Nuxt', category: 'Full-Stack Framework', description: 'Framework de Vue.js para aplicaciones universales.', icon: 'i-lucide-layers', span: 5, showInStack: true },
+  { name: 'Node.js', category: 'Runtime', description: 'Entorno de ejecución para JavaScript del lado del servidor.', icon: 'i-lucide-terminal', span: 5, showInStack: true },
+  { name: 'PostgreSQL', category: 'Database', description: 'Sistema de base de datos relacional objeto-orientado.', icon: 'i-lucide-database', span: 7, showInStack: true },
+  { name: 'React', category: 'Frontend Library', description: 'Biblioteca para construir interfaces de usuario interactivas.', icon: 'i-lucide-atom', span: 5, showInStack: false },
+  { name: 'Next.js', category: 'Full-Stack Framework', description: 'Framework de React con renderizado híbrido y estático.', icon: 'i-lucide-globe', span: 5, showInStack: false },
+  { name: 'JavaScript', category: 'Language', description: 'Lenguaje de programación multiplataforma y orientado a objetos.', icon: 'i-lucide-file-type', span: 8, showInStack: true },
+  { name: 'Express', category: 'Backend Framework', description: 'Framework web minimalista para Node.js.', icon: 'i-lucide-server', span: 5, showInStack: false },
 ];
 
 const experiencesSeed = [
   {
-    year: 2024,
+    year: 2022,
     role: 'Desarrollador Frontend Senior',
     company: 'Tech Company',
     location: 'Santiago, CL',

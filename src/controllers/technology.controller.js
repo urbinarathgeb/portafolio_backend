@@ -2,8 +2,8 @@ import * as technologyService from '../services/technology.service.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { success } from '../utils/response.js';
 
-export const list = asyncHandler(async (_req, res) => {
-  const technologies = await technologyService.getAll();
+export const list = asyncHandler(async (req, res) => {
+  const technologies = await technologyService.getAll(req.query);
   return success(res, { message: 'Tecnologías obtenidas correctamente', data: technologies });
 });
 

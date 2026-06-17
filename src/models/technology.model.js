@@ -33,6 +33,10 @@ Technology.init({
   span: {
     type: DataTypes.INTEGER,
   },
+  showInStack: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 }, {
   sequelize,
   modelName: 'Technology',
