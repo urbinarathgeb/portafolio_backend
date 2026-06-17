@@ -108,7 +108,9 @@ El proyecto incluye archivos `.http` para testing manual en `requests/`. Compati
 - `project.request.http` — CRUD de projects (14 requests, GET públicos, POST/PUT/DELETE con JWT)
 - `projectImage.request.http` — Subida y listado de imágenes (13 requests, todos con JWT)
 - `contact.request.http` — Contacto público y listado privado (5 requests)
-- `service.request.http` — CRUD de servicios con JWT (8 requests)
+- `service.request.http` — CRUD de servicios (8 requests, GET públicos, POST/PUT/DELETE con JWT)
+- `experience.request.http` — CRUD de experiencias con tecnologías (8 requests)
+- `technology.request.http` — CRUD de tecnologías (8 requests)
 
 ## Adaptación de la consigna (Módulo 8)
 
@@ -119,7 +121,7 @@ Este backend adapta los requerimientos de una clínica médica a un **portafolio
 | 1 | `POST /api/login` | Login del admin | `POST /auth/login` | Público |
 | 2 | `GET /about` | Información pública de la API | `GET /about` | Público |
 | 3 | Listar pacientes (privado) | Listar mensajes de contacto | `GET /contacts` | Privado (JWT) |
-| 4 | Listar médicos (privado) | Listar servicios ofrecidos | `GET /services` | Privado (JWT) |
+| 4 | Listar médicos (privado) | Listar servicios ofrecidos | `GET /services` | Público |
 | 5 | Subir exámenes (solo PDF) | Subir imágenes de proyectos (solo imágenes) | `POST /projects/:id/images` | Privado (JWT) |
 | 6 | Listar archivos subidos (privado) | Listar imágenes subidas | `GET /images` | Privado (JWT) |
 
@@ -136,6 +138,24 @@ Este backend adapta los requerimientos de una clínica médica a un **portafolio
 >
 > **Seguridad:** `POST /auth/login` retorna siempre `"Credenciales inválidas"` tanto para email no registrado como para contraseña incorrecta, para evitar email enumeration.
 
+### Profile
+
+| Método | Ruta | Descripción | Status | Acceso |
+|---|---|---|---|---|
+| `GET` | `/profile` | Obtener perfil público del admin | 200 / 404 | Público |
+| `PATCH` | `/profile` | Actualizar perfil | 200 / 400 / 404 | Privado (JWT) |
+
+**Campos del perfil:**
+- `name`, `lastname` (string) — Nombre completo
+- `email` (string) — Email de contacto
+- `title` (string) — Título profesional (ej: "Desarrollador Full Stack")
+- `tagline` (string) — Frase corta de cabecera
+- `heroDescription` (text) — Descripción del hero
+- `bio` (text) — Biografía
+- `availability` (string) — Disponibilidad (ej: `"available"`, `"busy"`)
+- `location` (string) — Ubicación
+- `avatar` (url) — URL del avatar
+
 ### Projects
 
 | Método | Ruta | Descripción | Status | Acceso |
@@ -143,26 +163,54 @@ Este backend adapta los requerimientos de una clínica médica a un **portafolio
 | `GET` | `/projects` | Listar todos los proyectos | 200 | Público |
 | `GET` | `/projects/:id` | Obtener un proyecto por ID (incluye imágenes) | 200 / 404 | Público |
 | `POST` | `/projects` | Crear un proyecto | 201 / 400 | Privado (JWT) |
-| `PUT` | `/projects/:id` | Actualizar un proyecto | 200 / 404 | Privado (JWT) |
+| `PUT` | `/projects/:id` | Actualizar un proyecto (incluye `techIds` para tecnologías) | 200 / 404 | Privado (JWT) |
 | `DELETE` | `/projects/:id` | Eliminar un proyecto (soft delete) | 200 / 404 | Privado (JWT) |
+
+> **Normalización de tecnologías:** Los proyectos ahora usan una tabla centralizada `technologies` con relación M:N vía `project_technologies`. Al crear/actualizar un proyecto, se envía `techIds: [1, 2, 3]`. La respuesta incluye `techStackDetails: [{ id, name, iconUrl }]`. El frontend mapea con `.map(t => t.name)`. Las tecnologías incluyen el campo `showInStack` para determinar si deben mostrarse en la sección stack del portafolio.
 
 ### Contacts
 
 | Método | Ruta | Descripción | Status | Acceso |
 |---|---|---|---|---|
-| `POST` | `/contacts` | Enviar un mensaje de contacto | 201 / 400 | Público |
+| `POST` | `/contacts` | Enviar un mensaje de contacto (soporta `company` e `interest`) | 201 / 400 | Público |
 | `GET` | `/contacts` | Listar todos los mensajes de contacto | 200 | Privado (JWT) |
 | `PATCH` | `/contacts/:id` | Marcar mensaje como leído | 200 / 404 | Privado (JWT) |
+
+**Campos adicionales de contacto:**
+- `company` (string, opcional) — Empresa del remitente
+- `interest` (enum, opcional) — `fulltime` | `freelance` | `consultoria` | `saludar`
 
 ### Services
 
 | Método | Ruta | Descripción | Status | Acceso |
-|---|---|---|---|---|
-| `GET` | `/services` | Listar todos los servicios | 200 | Privado (JWT) |
-| `GET` | `/services/:id` | Obtener un servicio por ID | 200 / 404 | Privado (JWT) |
+|---|---|---|---|---|---|
+| `GET` | `/services` | Listar todos los servicios | 200 | Público |
+| `GET` | `/services/:id` | Obtener un servicio por ID | 200 / 404 | Público |
 | `POST` | `/services` | Crear un servicio | 201 / 400 | Privado (JWT) |
 | `PUT` | `/services/:id` | Actualizar un servicio | 200 / 404 | Privado (JWT) |
 | `DELETE` | `/services/:id` | Eliminar un servicio (soft delete) | 200 / 404 | Privado (JWT) |
+
+### Experiences
+
+| Método | Ruta | Descripción | Status | Acceso |
+|---|---|---|---|---|
+| `GET` | `/experiences` | Listar todas las experiencias (incluye tecnologías asociadas) | 200 | Público |
+| `GET` | `/experiences/:id` | Obtener una experiencia por ID | 200 / 404 | Público |
+| `POST` | `/experiences` | Crear una experiencia con tecnologías | 201 / 400 | Privado (JWT) |
+| `PUT` | `/experiences/:id` | Actualizar una experiencia | 200 / 404 | Privado (JWT) |
+| `DELETE` | `/experiences/:id` | Eliminar una experiencia (soft delete) | 200 / 404 | Privado (JWT) |
+
+### Technologies
+
+| Método | Ruta | Descripción | Status | Acceso |
+|---|---|---|---|---|
+| `GET` | `/technologies` | Listar todas las tecnologías | 200 | Público |
+| `GET` | `/technologies/:id` | Obtener una tecnología por ID | 200 / 404 | Público |
+| `POST` | `/technologies` | Crear una tecnología | 201 / 400 | Privado (JWT) |
+| `PUT` | `/technologies/:id` | Actualizar una tecnología | 200 / 404 | Privado (JWT) |
+| `DELETE` | `/technologies/:id` | Eliminar una tecnología (soft delete) | 200 / 404 | Privado (JWT) |
+
+> **Filtro stack:** `GET /technologies?stack=true` devuelve solo las tecnologías marcadas como visibles en la sección stack del portafolio (`showInStack: true`). Sin el query param, devuelve el listado completo para el dashboard.
 
 ### Project Images (protegido)
 
@@ -240,10 +288,13 @@ src/
 │   └── cloudinary.config.js            # Configuración del SDK de Cloudinary
 ├── controllers/
 │   ├── auth.controller.js              # Handlers de autenticación (login)
-│   ├── project.controller.js           # Handlers de projects (CRUD)
 │   ├── contact.controller.js           # Handlers de contacts (list, create)
+│   ├── experience.controller.js        # Handlers de experiences (CRUD)
+│   ├── profile.controller.js           # Handlers de profile (get, update)
+│   ├── project.controller.js           # Handlers de projects (CRUD)
+│   ├── projectImage.controller.js      # Handlers de imágenes (listAll, listByProject, upload)
 │   ├── service.controller.js           # Handlers de services (CRUD)
-│   └── projectImage.controller.js      # Handlers de imágenes (listAll, listByProject, upload)
+│   └── technology.controller.js        # Handlers de technologies (CRUD)
 ├── middlewares/
 │   ├── authenticate.middleware.js      # Middleware de verificación JWT
 │   ├── errorHandler.middleware.js      # Handler global de errores (AppError, Sequelize, MulterError, inesperados)
@@ -255,30 +306,42 @@ src/
 │   ├── user.model.js                   # Modelo User
 │   ├── project.model.js                # Modelo Project
 │   ├── projectImage.model.js           # Modelo ProjectImage
+│   ├── projectTech.model.js            # Modelo join table Project↔Technology
 │   ├── contact.model.js                # Modelo Contact
-│   └── service.model.js                # Modelo Service
+│   ├── service.model.js                # Modelo Service
+│   ├── experience.model.js             # Modelo Experience
+│   ├── experienceTech.model.js         # Modelo join table Experience↔Technology
+│   └── technology.model.js             # Modelo Technology
 ├── routes/
 │   ├── auth.routes.js                  # Rutas de autenticación (POST /login, GET /about)
-│   ├── project.routes.js               # Rutas de projects con validación
 │   ├── contact.routes.js               # Rutas de contacts
+│   ├── experience.routes.js            # Rutas de experiences
+│   ├── profile.routes.js               # Rutas de profile
+│   ├── project.routes.js               # Rutas de projects con validación
+│   ├── projectImage.routes.js          # Rutas de imágenes (GET /images, GET/POST /projects/:id/images)
 │   ├── service.routes.js               # Rutas de services
-│   └── projectImage.routes.js          # Rutas de imágenes (GET /images, GET/POST /projects/:id/images)
+│   └── technology.routes.js            # Rutas de technologies
 ├── seeders/
 │   └── initial.seed.js                # Datos iniciales de prueba (solo en desarrollo)
 ├── services/
 │   ├── auth.service.js                 # Lógica de autenticación (login, verificación JWT)
-│   ├── project.service.js              # Lógica de negocio de projects
 │   ├── contact.service.js              # Lógica de negocio de contacts
+│   ├── experience.service.js           # Lógica de negocio de experiences
+│   ├── profile.service.js              # Lógica de negocio de profile
+│   ├── project.service.js              # Lógica de negocio de projects
+│   ├── projectImage.service.js         # Lógica de subida a Cloudinary + persistencia en BD
 │   ├── service.service.js              # Lógica de negocio de services
-│   └── projectImage.service.js         # Lógica de subida a Cloudinary + persistencia en BD
+│   └── technology.service.js           # Lógica de negocio de technologies
 ├── utils/
 │   ├── asyncHandler.js                 # Wrapper para capturar errores async
 │   ├── errors.js                      # Clases de error personalizadas
 │   └── response.js                    # Helper de respuesta estandarizada (success)
 └── validations/
-    ├── rules.js                        # Reglas de validación reutilizables (required, isUrl, isInt, optional)
+    ├── rules.js                        # Reglas de validación reutilizables (required, isUrl, isInt, optional, isArray, isArrayOf)
     ├── auth.validation.js              # Esquemas de validación de autenticación
     ├── contact.validation.js           # Esquemas de validación de contacts
+    ├── experience.validation.js        # Esquemas de validación de experiences
+    ├── profile.validation.js           # Esquemas de validación de profile
     ├── project.validation.js           # Esquemas de validación de projects
     └── service.validation.js           # Esquemas de validación de services
 ```

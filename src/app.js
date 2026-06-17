@@ -11,6 +11,8 @@ import authRoutes from './routes/auth.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import serviceRoutes from './routes/service.routes.js';
 import projectImageRoutes from './routes/projectImage.routes.js';
+import experienceRoutes from './routes/experience.routes.js';
+import technologyRoutes from './routes/technology.routes.js';
 
 const app = express();
 
@@ -26,6 +28,8 @@ app.use('/', projectRoutes);
 app.use('/', contactRoutes);
 app.use('/', serviceRoutes);
 app.use('/', projectImageRoutes);
+app.use('/', experienceRoutes);
+app.use('/', technologyRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
