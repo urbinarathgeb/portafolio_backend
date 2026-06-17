@@ -8,6 +8,7 @@ const FOLDER = 'portafolio-javierUrbina';
 
 export const getAll = async () => {
   return await ProjectImage.findAll({
+    include: [{ model: Project, as: 'project', attributes: ['title'] }],
     order: [['createdAt', 'DESC']],
   });
 };
@@ -64,4 +65,32 @@ export const uploadImage = async (projectId, file) => {
   }
 
   return projectImage;
+};
+
+export const setPreview = async (id, isPreview) => {
+  const image = await ProjectImage.findByPk(id);
+  if (!image) throw new NotFoundError('Imagen no encontrada');
+
+  if (isPreview) {
+    const projectImages = await ProjectImage.findAll({
+      where: { projectId: image.projectId },
+    });
+    for (const img of projectImages) {
+      await img.update({ isPreview: img.id === Number(id) });
+    }
+    const project = await Project.findByPk(image.projectId);
+    if (project) {
+      await project.update({ imagePreview: image.url });
+    }
+  } else {
+    await image.update({ isPreview: false });
+    const project = await Project.findByPk(image.projectId);
+    if (project && project.imagePreview === image.url) {
+      await project.update({ imagePreview: null });
+    }
+  }
+
+  return ProjectImage.findByPk(id, {
+    include: [{ model: Project, as: 'project', attributes: ['title'] }],
+  });
 };

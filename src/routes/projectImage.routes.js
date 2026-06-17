@@ -10,5 +10,6 @@ const router = Router();
 router.get('/images', authenticate, projectImageController.listAll);
 router.get('/projects/:id/images', authenticate, validate(idParamSchema, 'params'), projectImageController.listByProject);
 router.post('/projects/:id/images', authenticate, validate(idParamSchema, 'params'), uploadSingleImage, projectImageController.upload);
+router.patch('/images/:id/preview', authenticate, projectImageController.setPreview);
 
 export default router;

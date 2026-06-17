@@ -31,3 +31,11 @@ export const upload = asyncHandler(async (req, res) => {
     status: 201,
   });
 });
+
+export const setPreview = asyncHandler(async (req, res) => {
+  const image = await projectImageService.setPreview(req.params.id, req.body.isPreview);
+  return success(res, {
+    message: image.isPreview ? 'Imagen establecida como preview' : 'Preview eliminado',
+    data: image,
+  });
+});

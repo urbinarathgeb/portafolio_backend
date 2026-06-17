@@ -6,8 +6,8 @@ import { createServiceSchema, updateServiceSchema, idParamSchema } from '../vali
 
 const router = Router();
 
-router.get('/services', authenticate, serviceController.list);
-router.get('/services/:id', authenticate, validate(idParamSchema, 'params'), serviceController.detail);
+router.get('/services', serviceController.list);
+router.get('/services/:id', validate(idParamSchema, 'params'), serviceController.detail);
 router.post('/services', authenticate, validate(createServiceSchema), serviceController.create);
 router.put('/services/:id', authenticate, validate(idParamSchema, 'params'), validate(updateServiceSchema), serviceController.update);
 router.delete('/services/:id', authenticate, validate(idParamSchema, 'params'), serviceController.remove);
