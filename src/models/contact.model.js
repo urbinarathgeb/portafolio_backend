@@ -31,6 +31,20 @@ Contact.init({
       notEmpty: { msg: 'El mensaje es obligatorio' },
     },
   },
+  company: {
+    type: DataTypes.STRING(200),
+  },
+  interest: {
+    type: DataTypes.STRING(50),
+    validate: {
+      isIn(value) {
+        const allowed = ['fulltime', 'freelance', 'consultoria', 'saludar'];
+        if (value !== null && value !== undefined && value !== '' && !allowed.includes(value)) {
+          throw new Error('El interés debe ser uno de: fulltime, freelance, consultoria, saludar');
+        }
+      },
+    },
+  },
   isRead: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,

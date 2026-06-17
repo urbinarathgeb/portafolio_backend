@@ -52,6 +52,28 @@ User.init({
       }
     }
   },
+  title: {
+    type: DataTypes.STRING(100),
+  },
+  tagline: {
+    type: DataTypes.STRING(200),
+  },
+  heroDescription: {
+    type: DataTypes.TEXT,
+  },
+  bio: {
+    type: DataTypes.TEXT,
+  },
+  availability: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+  },
+  location: {
+    type: DataTypes.STRING(100),
+  },
+  avatar: {
+    type: DataTypes.STRING(255),
+  },
 }, {
   sequelize,
   modelName: 'User',

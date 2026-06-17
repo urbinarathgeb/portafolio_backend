@@ -11,8 +11,8 @@ export const list = asyncHandler(async (_req, res) => {
 });
 
 export const create = asyncHandler(async (req, res) => {
-  const { name, email, message } = req.body;
-  const contact = await contactService.create({ name, email, message });
+  const { name, email, message, company, interest } = req.body;
+  const contact = await contactService.create({ name, email, message, company, interest });
   return success(res, {
     message: 'Mensaje enviado correctamente',
     data: contact,
