@@ -218,6 +218,8 @@ Este backend adapta los requerimientos de una clínica médica a un **portafolio
 | `DELETE` | `/technologies/:id` | Eliminar una tecnología (soft delete) | 200 / 404 | Privado (JWT) |
 
 > **Filtro stack:** `GET /technologies?stack=true` devuelve solo las tecnologías marcadas como visibles en la sección stack del portafolio (`showInStack: true`). Sin el query param, devuelve el listado completo para el dashboard.
+>
+> **Ordenamiento:** Las tecnologías incluyen el campo `sortOrder` (integer) para controlar el orden de visualización en el stack del portafolio.
 
 ### Project Images (protegido)
 
@@ -334,6 +336,7 @@ src/
 │   └── initial.seed.js                # Datos iniciales de prueba (solo en desarrollo)
 ├── services/
 │   ├── auth.service.js                 # Lógica de autenticación (login, verificación JWT)
+│   ├── cloudinary.service.js           # Servicio de subida de archivos a Cloudinary (stream upload)
 │   ├── contact.service.js              # Lógica de negocio de contacts
 │   ├── experience.service.js           # Lógica de negocio de experiences
 │   ├── profile.service.js              # Lógica de negocio de profile
@@ -348,6 +351,7 @@ src/
 └── validations/
     ├── rules.js                        # Reglas de validación reutilizables (required, isUrl, isInt, optional, isArray, isArrayOf)
     ├── auth.validation.js              # Esquemas de validación de autenticación
+    ├── common.validation.js            # Esquemas compartidos (idParamSchema para validación de :id)
     ├── contact.validation.js           # Esquemas de validación de contacts
     ├── experience.validation.js        # Esquemas de validación de experiences
     ├── profile.validation.js           # Esquemas de validación de profile
@@ -368,6 +372,31 @@ Route → Controller → Service → Model
 - **Controllers:** Reciben request/response, orquestan lógica. Solo invocan services.
 - **Services:** Contienen lógica de negocio. Invocan métodos de modelos Sequelize.
 - **Models:** Definiciones Sequelize. No contienen lógica de negocio.
+
+## Optimizaciones
+
+### Bug fix: `techIds: []` no limpiaba relación M:N
+
+Al enviar un array vacío (`techIds: []`) en proyectos o experiencias, la condición `techIds && techIds.length > 0` impedía ejecutar `setTechnologies`, dejando la relación M:N intacta. Se cambió a `techIds !== undefined` para que un array vacío limpie correctamente todas las tecnologías asociadas.
+
+### Centralización de `idParamSchema`
+
+Se eliminaron 4 definiciones duplicadas de validación del parámetro `:id` moviéndolas a `src/validations/common.validation.js`. Ahora todas las rutas importan `idParamSchema` desde un único lugar.
+
+### Extracción de Cloudinary a servicio propio
+
+La lógica de subida a Cloudinary se extrajo de `projectImage.service.js` a `src/services/cloudinary.service.js`, permitiendo reutilización en otros módulos sin acoplar la subida de archivos a un modelo específico.
+
+### Optimización N+1 en `setPreview`
+
+El método para establecer una imagen como preview de un proyecto recorría todas las imágenes en un loop ejecutando `update` por cada una. Se reemplazó por `ProjectImage.update({ isPreview: false }, { where: { projectId } })`, reduciendo la operación a 2 queries fijas sin importar la cantidad de imágenes.
+
+### Cascade soft-delete
+
+Se implementaron hooks `beforeDestroy` en los modelos:
+
+- **Project (`src/models/project.model.js`)**: Al hacer soft-delete de un proyecto, elimina automáticamente sus imágenes (`project_images`) y limpia las relaciones en `project_technologies`.
+- **Experience (`src/models/experience.model.js`)**: Al hacer soft-delete de una experiencia, limpia automáticamente las relaciones en `experience_technologies`.
 
 ## Manejo de errores
 
@@ -396,6 +425,12 @@ Validación en dos capas:
 
 1. **Middleware** (`src/middlewares/validate.middleware.js`): Valida input del request usando esquemas definidos en `src/validations/`. Reglas reutilizables en `src/validations/rules.js`.
 2. **Modelo Sequelize**: Validaciones a nivel BD (`validate` en definición de campos).
+
+## Seguridad
+
+- **Helmet** — Middleware de seguridad que configura headers HTTP para proteger contra vulnerabilidades web comunes (XSS, clickjacking, MIME sniffing, etc.). Se aplica globalmente en `src/app.js` con configuración por defecto.
+- **Morgan** — Logger de requests HTTP en formato `dev` para monitorear todas las peticiones entrantes en consola.
+- **Rate limiting** — `POST /auth/login` limitado a 10 intentos por IP en una ventana de 15 minutos mediante `express-rate-limit`. Configuración en `src/middlewares/rateLimiter.middleware.js`.
 
 ## Stack
 
