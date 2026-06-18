@@ -1,7 +1,7 @@
-import Project from '../models/project.model.js'
-import User from '../models/user.model.js'
-import ProjectImage from '../models/projectImage.model.js'
-import Technology from '../models/technology.model.js'
+import Project from '../models/project.model.js';
+import User from '../models/user.model.js';
+import ProjectImage from '../models/projectImage.model.js';
+import Technology from '../models/technology.model.js';
 import { NotFoundError } from '../utils/errors.js';
 
 const defaultInclude = [
@@ -10,8 +10,10 @@ const defaultInclude = [
   { model: Technology, as: 'techStackDetails', through: { attributes: [] } },
 ];
 
+const listAttributes = { exclude: ['caseStudy'] };
+
 export const getAll = async () => {
-  return await Project.findAll({ include: defaultInclude });
+  return await Project.findAll({ attributes: listAttributes, include: defaultInclude });
 }
 
 export const getById = async (id) => {
@@ -23,7 +25,7 @@ export const getById = async (id) => {
 export const create = async (data) => {
   const { techIds, ...projectData } = data;
   const project = await Project.create(projectData);
-  if (techIds && techIds.length > 0) {
+  if (techIds !== undefined) {
     await project.setTechStackDetails(techIds);
   }
   return await getById(project.id);
@@ -34,7 +36,7 @@ export const update = async (id, data) => {
   if (!project) throw new NotFoundError('Proyecto no encontrado');
   const { techIds, ...projectData } = data;
   await project.update(projectData);
-  if (techIds && techIds.length > 0) {
+  if (techIds !== undefined) {
     await project.setTechStackDetails(techIds);
   }
   return await getById(id);

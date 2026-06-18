@@ -2,7 +2,8 @@ import { ValidationError } from '../utils/errors.js';
 
 export const validate = (schema, source = 'body') => (req, res, next) => {
   const errors = [];
-  const data = source === 'params' ? req.params : req.body;
+  const sources = { body: req.body, params: req.params, query: req.query };
+  const data = sources[source] || req.body;
 
   for (const [field, rules] of Object.entries(schema)) {
     for (const rule of rules) {

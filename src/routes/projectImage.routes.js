@@ -3,7 +3,7 @@ import * as projectImageController from '../controllers/projectImage.controller.
 import { authenticate } from '../middlewares/authenticate.middleware.js';
 import { uploadSingleImage } from '../middlewares/upload.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
-import { idParamSchema } from '../validations/project.validation.js';
+import { idParamSchema } from '../validations/common.validation.js';
 
 const router = Router();
 

@@ -10,6 +10,4 @@ export const updateServiceSchema = {
   description: [optional(required)],
 };
 
-export const idParamSchema = {
-  id: [required, isInt],
-};
+

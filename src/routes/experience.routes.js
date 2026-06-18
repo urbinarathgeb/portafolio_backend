@@ -2,7 +2,8 @@ import { Router } from 'express';
 import * as experienceController from '../controllers/experience.controller.js';
 import { authenticate } from '../middlewares/authenticate.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
-import { createExperienceSchema, updateExperienceSchema, idParamSchema } from '../validations/experience.validation.js';
+import { idParamSchema } from '../validations/common.validation.js';
+import { createExperienceSchema, updateExperienceSchema } from '../validations/experience.validation.js';
 
 const router = Router();
 

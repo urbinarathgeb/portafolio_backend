@@ -1,5 +1,4 @@
-import { Readable } from 'stream';
-import cloudinary from '../config/cloudinary.config.js';
+import * as cloudinaryService from './cloudinary.service.js';
 import ProjectImage from '../models/projectImage.model.js';
 import Project from '../models/project.model.js';
 import { NotFoundError } from '../utils/errors.js';
@@ -27,26 +26,8 @@ export const uploadImage = async (projectId, file) => {
   const project = await Project.findByPk(projectId);
   if (!project) throw new NotFoundError('Proyecto no encontrado');
 
-  const result = await new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: `${FOLDER}/projects/${projectId}`,
-        resource_type: 'image',
-        use_filename: true,
-        unique_filename: true,
-        filename_override: file.originalname,
-      },
-      (error, result) => {
-        if (error) {
-          reject(new Error(`Error al subir imagen a Cloudinary: ${error.message}`));
-        } else {
-          resolve(result);
-        }
-      }
-    );
-
-    Readable.from(file.buffer).pipe(uploadStream);
-  });
+  const folder = `${FOLDER}/projects/${projectId}`;
+  const result = await cloudinaryService.uploadImage(file, folder);
 
   const isFirstImage = !project.imagePreview;
 
@@ -70,21 +51,21 @@ export const uploadImage = async (projectId, file) => {
 export const setPreview = async (id, isPreview) => {
   const image = await ProjectImage.findByPk(id);
   if (!image) throw new NotFoundError('Imagen no encontrada');
+  const projectId = image.projectId;
 
   if (isPreview) {
-    const projectImages = await ProjectImage.findAll({
-      where: { projectId: image.projectId },
-    });
-    for (const img of projectImages) {
-      await img.update({ isPreview: img.id === Number(id) });
-    }
-    const project = await Project.findByPk(image.projectId);
+    await ProjectImage.update(
+      { isPreview: false },
+      { where: { projectId } }
+    );
+    await image.update({ isPreview: true });
+    const project = await Project.findByPk(projectId);
     if (project) {
       await project.update({ imagePreview: image.url });
     }
   } else {
     await image.update({ isPreview: false });
-    const project = await Project.findByPk(image.projectId);
+    const project = await Project.findByPk(projectId);
     if (project && project.imagePreview === image.url) {
       await project.update({ imagePreview: null });
     }

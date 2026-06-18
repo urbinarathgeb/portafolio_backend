@@ -129,14 +129,17 @@ Este backend adapta los requerimientos de una clínica médica a un **portafolio
 
 ### Auth
 
-| Método | Ruta | Descripción | Status |
-|---|---|---|---|
-| `POST` | `/auth/login` | Iniciar sesión (devuelve JWT) | 200 / 400 / 401 |
-| `GET` | `/about` | Información pública de la API | 200 |
+| Método | Ruta | Descripción | Status | Acceso |
+|---|---|---|---|---|
+| `POST` | `/auth/login` | Iniciar sesión (devuelve JWT) | 200 / 400 / 401 | Público |
+| `GET` | `/about` | Información pública de la API | 200 | Público |
+| `PATCH` | `/auth/password` | Cambiar contraseña | 200 / 400 / 401 | Privado (JWT) |
 
 > Endpoints protegidos requieren header: `Authorization: Bearer <token>`
 >
 > **Seguridad:** `POST /auth/login` retorna siempre `"Credenciales inválidas"` tanto para email no registrado como para contraseña incorrecta, para evitar email enumeration.
+>
+> **Rate limiting:** `POST /auth/login` está limitado a 10 intentos por IP en una ventana de 15 minutos. Al superar el límite, responde con `429 Too Many Requests`.
 
 ### Profile
 
@@ -152,7 +155,7 @@ Este backend adapta los requerimientos de una clínica médica a un **portafolio
 - `tagline` (string) — Frase corta de cabecera
 - `heroDescription` (text) — Descripción del hero
 - `bio` (text) — Biografía
-- `availability` (string) — Disponibilidad (ej: `"available"`, `"busy"`)
+- `availability` (boolean) — Disponibilidad (`true` / `false`)
 - `location` (string) — Ubicación
 - `avatar` (url) — URL del avatar
 
@@ -167,6 +170,8 @@ Este backend adapta los requerimientos de una clínica médica a un **portafolio
 | `DELETE` | `/projects/:id` | Eliminar un proyecto (soft delete) | 200 / 404 | Privado (JWT) |
 
 > **Normalización de tecnologías:** Los proyectos ahora usan una tabla centralizada `technologies` con relación M:N vía `project_technologies`. Al crear/actualizar un proyecto, se envía `techIds: [1, 2, 3]`. La respuesta incluye `techStackDetails: [{ id, name, iconUrl }]`. El frontend mapea con `.map(t => t.name)`. Las tecnologías incluyen el campo `showInStack` para determinar si deben mostrarse en la sección stack del portafolio.
+>
+> **Cascade:** Al eliminar un proyecto (soft delete), se eliminan automáticamente sus imágenes asociadas y las relaciones en la tabla `project_technologies`.
 
 ### Contacts
 
@@ -200,6 +205,8 @@ Este backend adapta los requerimientos de una clínica médica a un **portafolio
 | `PUT` | `/experiences/:id` | Actualizar una experiencia | 200 / 404 | Privado (JWT) |
 | `DELETE` | `/experiences/:id` | Eliminar una experiencia (soft delete) | 200 / 404 | Privado (JWT) |
 
+> **Cascade:** Al eliminar una experiencia (soft delete), se eliminan automáticamente sus relaciones en la tabla `experience_technologies`.
+
 ### Technologies
 
 | Método | Ruta | Descripción | Status | Acceso |
@@ -219,6 +226,7 @@ Este backend adapta los requerimientos de una clínica médica a un **portafolio
 | `GET` | `/images` | Listar todas las imágenes subidas | 200 |
 | `GET` | `/projects/:id/images` | Listar imágenes de un proyecto | 200 / 404 |
 | `POST` | `/projects/:id/images` | Subir imagen a un proyecto (solo jpg/png/webp) | 201 / 400 |
+| `PATCH` | `/images/:id/preview` | Establecer o quitar imagen como preview del proyecto | 200 / 404 |
 
 **POST /projects/:id/images** — Enviar como `multipart/form-data` con el campo `image`:
 
@@ -299,6 +307,7 @@ src/
 │   ├── authenticate.middleware.js      # Middleware de verificación JWT
 │   ├── errorHandler.middleware.js      # Handler global de errores (AppError, Sequelize, MulterError, inesperados)
 │   ├── notFound.middleware.js          # Middleware para rutas no encontradas (404)
+│   ├── rateLimiter.middleware.js       # Rate limiting para login (express-rate-limit)
 │   ├── upload.middleware.js            # Configuración de multer (memoryStorage, 2MB, filtro de tipos)
 │   └── validate.middleware.js          # Middleware genérico de validación (recibe esquema + fuente)
 ├── models/
@@ -343,7 +352,8 @@ src/
     ├── experience.validation.js        # Esquemas de validación de experiences
     ├── profile.validation.js           # Esquemas de validación de profile
     ├── project.validation.js           # Esquemas de validación de projects
-    └── service.validation.js           # Esquemas de validación de services
+    ├── service.validation.js           # Esquemas de validación de services
+    └── technology.validation.js        # Esquemas de validación de technologies
 ```
 
 ## Arquitectura
@@ -393,6 +403,9 @@ Validación en dos capas:
 - **Sequelize** 6 - ORM para PostgreSQL
 - **pg** - Driver de PostgreSQL
 - **cors** - Middleware de CORS
+- **helmet** - Middleware de seguridad (headers HTTP)
+- **morgan** - Logger de requests HTTP
+- **express-rate-limit** - Rate limiting para endpoints sensibles
 - **dotenv** - Variables de entorno
 - **cross-env** - Compatibilidad cross-platform para NODE_ENV
 - **multer** - Middleware para subida de archivos (multipart/form-data)

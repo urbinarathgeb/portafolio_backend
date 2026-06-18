@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/db.config.js';
+import ExperienceTechnology from './experienceTech.model.js';
 
 class Experience extends Model {}
 
@@ -56,6 +57,15 @@ Experience.init({
   timestamps: true,
   underscored: true,
   paranoid: true,
+  hooks: {
+    beforeDestroy: async (experience, options) => {
+      const { transaction } = options;
+      await ExperienceTechnology.destroy({
+        where: { experienceId: experience.id },
+        transaction,
+      });
+    },
+  },
 });
 
 export default Experience;

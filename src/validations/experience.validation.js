@@ -20,4 +20,4 @@ export const updateExperienceSchema = {
   techIds: [optional(isArray), optional(isArrayOf(isInt))],
 };
 
-export const idParamSchema = { id: [required, isInt] };
+

@@ -2,7 +2,8 @@ import { Router } from 'express';
 import * as projectController from '../controllers/project.controller.js';
 import { authenticate } from '../middlewares/authenticate.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
-import { createProjectSchema, updateProjectSchema, idParamSchema } from '../validations/project.validation.js';
+import { idParamSchema } from '../validations/common.validation.js';
+import { createProjectSchema, updateProjectSchema } from '../validations/project.validation.js';
 
 const router = Router();
 

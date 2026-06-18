@@ -2,7 +2,8 @@ import { Router } from 'express';
 import * as serviceController from '../controllers/service.controller.js';
 import { authenticate } from '../middlewares/authenticate.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
-import { createServiceSchema, updateServiceSchema, idParamSchema } from '../validations/service.validation.js';
+import { idParamSchema } from '../validations/common.validation.js';
+import { createServiceSchema, updateServiceSchema } from '../validations/service.validation.js';
 
 const router = Router();
 

@@ -24,7 +24,7 @@ export const getById = async (id) => {
 export const create = async (data) => {
   const { techIds, ...experienceData } = data;
   const experience = await Experience.create(experienceData);
-  if (techIds && techIds.length > 0) {
+  if (techIds !== undefined) {
     await experience.setTechnologies(techIds);
   }
   return await getById(experience.id);
@@ -35,7 +35,7 @@ export const update = async (id, data) => {
   if (!experience) throw new NotFoundError('Experiencia no encontrada');
   const { techIds, ...experienceData } = data;
   await experience.update(experienceData);
-  if (techIds && techIds.length > 0) {
+  if (techIds !== undefined) {
     await experience.setTechnologies(techIds);
   }
   return await getById(id);
