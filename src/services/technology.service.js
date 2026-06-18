@@ -4,7 +4,7 @@ import { NotFoundError } from '../utils/errors.js';
 export const getAll = async (query = {}) => {
   const where = {};
   if (query.stack === 'true') where.showInStack = true;
-  return await Technology.findAll({ where, order: [['name', 'ASC']] });
+  return await Technology.findAll({ where, order: [['order', 'ASC'], ['name', 'ASC']] });
 };
 
 export const getById = async (id) => {

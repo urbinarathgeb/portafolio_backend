@@ -33,6 +33,10 @@ Technology.init({
   span: {
     type: DataTypes.INTEGER,
   },
+  order: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
   showInStack: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,

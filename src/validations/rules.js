@@ -57,7 +57,25 @@ export const minLength = (min) => (field, value) => {
   return null;
 };
 
+export const min = (min) => (field, value) => {
+  if (value !== undefined && value !== null && value !== '' && Number(value) < min) {
+    return { field, message: `${field} debe ser mayor o igual a ${min}` };
+  }
+  return null;
+};
+
 export const optional = (rule) => (field, value, data) => {
   if (value === undefined || value === null || value === '') return null;
   return rule(field, value, data);
+};
+
+export const isJson = (field, value) => {
+  if (value) {
+    try {
+      JSON.parse(value);
+    } catch {
+      return { field, message: `${field} debe ser un JSON válido` };
+    }
+  }
+  return null;
 };
