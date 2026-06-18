@@ -1,0 +1,76 @@
+@baseURL = http://localhost:3001
+
+// ─────────────────────────────────────────────────────
+// GET (### 1-3): públicos, sin token
+// POST/PUT/DELETE (### 4-9): requieren {{token}}
+// ─────────────────────────────────────────────────────
+
+### 1. Listar todas las tecnologías
+GET {{baseURL}}/technologies
+
+### 2. Obtener tecnología por ID (existente)
+GET {{baseURL}}/technologies/1
+
+### 3. Obtener tecnología por ID (no encontrado)
+GET {{baseURL}}/technologies/9999
+
+### 4. Crear tecnología con todos los campos
+POST {{baseURL}}/technologies
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Docker",
+  "category": "DevOps",
+  "description": "Plataforma de contenedorización para despliegue de aplicaciones.",
+  "icon": "i-lucide-container",
+  "span": 4
+}
+
+### 5. Crear tecnología solo con campos obligatorios
+POST {{baseURL}}/technologies
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Figma",
+  "category": "Design"
+}
+
+### 6. Error: campos obligatorios vacíos
+POST {{baseURL}}/technologies
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "",
+  "category": ""
+}
+
+### 7. Error: nombre duplicado
+POST {{baseURL}}/technologies
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Vue.js",
+  "category": "Frontend"
+}
+
+### 8. Actualizar tecnología
+PUT {{baseURL}}/technologies/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Vue.js 3",
+  "span": 5
+}
+
+### 9. Eliminar tecnología
+DELETE {{baseURL}}/technologies/1
+Authorization: Bearer {{token}}
+
+### 10. Eliminar tecnología que no existe
+DELETE {{baseURL}}/technologies/9999
+Authorization: Bearer {{token}}

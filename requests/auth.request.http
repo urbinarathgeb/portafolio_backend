@@ -1,0 +1,50 @@
+@baseURL = http://localhost:3001
+
+// ─────────────────────────────────────────────────────
+// 1. Ejecuta "### Login exitoso" primero
+// 2. WebStorm asigna automáticamente {{token}}
+// 3. VS Code: copia token a .rest-client.env.json
+// ─────────────────────────────────────────────────────
+
+### 1. Obtener información de la API (público)
+GET {{baseURL}}/about
+
+### 2. Login exitoso
+POST {{baseURL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@mail.com",
+  "password": "admin123"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+### 3. Login: email incorrecto
+POST {{baseURL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "noexiste@mail.com",
+  "password": "admin123"
+}
+
+### 4. Login: contraseña incorrecta
+POST {{baseURL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@mail.com",
+  "password": "wrongpass"
+}
+
+### 5. Login: campos vacíos
+POST {{baseURL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "",
+  "password": ""
+}

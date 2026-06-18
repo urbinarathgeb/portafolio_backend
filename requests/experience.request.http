@@ -1,0 +1,87 @@
+@baseURL = http://localhost:3001
+
+// ─────────────────────────────────────────────────────
+// GET (### 1-3): públicos, sin token
+// POST/PUT/DELETE (### 4-9): requieren {{token}}
+// ─────────────────────────────────────────────────────
+
+### 1. Listar todas las experiencias
+GET {{baseURL}}/experiences
+
+### 2. Obtener experiencia por ID (existente)
+GET {{baseURL}}/experiences/1
+
+### 3. Obtener experiencia por ID (no encontrado)
+GET {{baseURL}}/experiences/9999
+
+### 4. Crear experiencia con todos los campos
+POST {{baseURL}}/experiences
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "year": 2025,
+  "role": "Full Stack Developer",
+  "company": "Nueva Empresa",
+  "location": "Santiago, CL",
+  "description": "Descripción de la nueva experiencia laboral.",
+  "order": 0,
+  "techIds": [1, 2, 4]
+}
+
+### 5. Crear experiencia solo con campos obligatorios
+POST {{baseURL}}/experiences
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "year": 2023,
+  "role": "Desarrollador Backend",
+  "company": "Otra Empresa",
+  "location": "Remoto",
+  "description": "Descripción del rol backend."
+}
+
+### 6. Error: campos obligatorios vacíos
+POST {{baseURL}}/experiences
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "year": "",
+  "role": "",
+  "company": "",
+  "location": "",
+  "description": ""
+}
+
+### 7. Actualizar experiencia
+PUT {{baseURL}}/experiences/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "role": "Desarrollador Frontend Senior Lead",
+  "order": 0
+}
+
+### 8. Eliminar experiencia
+DELETE {{baseURL}}/experiences/3
+Authorization: Bearer {{token}}
+
+### 9. Eliminar experiencia que no existe
+DELETE {{baseURL}}/experiences/9999
+Authorization: Bearer {{token}}
+
+### 10. Error: año no entero
+POST {{baseURL}}/experiences
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "year": "dos mil veinticuatro",
+  "role": "Rol",
+  "company": "Empresa",
+  "location": "Remoto",
+  "description": "Descripción"
+}
