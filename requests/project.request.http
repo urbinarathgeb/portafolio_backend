@@ -27,7 +27,8 @@ Authorization: Bearer {{token}}
   "subtitle": "Aplicación de portafolio",
   "description": "Aplicación fullstack para proyectos personales con panel de administración.",
   "imagePreview": "https://res.cloudinary.com/demo/image/upload/portfolio-app.png",
-  "githubURL": "https://github.com/jurbina/portfolio-app",
+  "githubURLFront": "https://github.com/jurbina/portfolio-app",
+  "githubURLBack": "https://github.com/jurbina/portfolio-app-api",
   "deployURL": "https://portfolio-app.vercel.app",
   "isFeatured": true,
   "userId": 1
@@ -66,7 +67,8 @@ Authorization: Bearer {{token}}
   "title": "Proyecto con URLs malas",
   "subtitle": "Subtítulo",
   "description": "Descripción del proyecto",
-  "githubURL": "no-es-una-url",
+  "githubURLFront": "no-es-una-url",
+  "githubURLBack": "tampoco-es-url",
   "deployURL": "tampoco-es-url",
   "userId": 1
 }
@@ -108,7 +110,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "githubURL": "url-invalida"
+  "githubURLFront": "url-invalida"
 }
 
 ### 12. Eliminar proyecto (verificar code: PROJECT_DELETED)
