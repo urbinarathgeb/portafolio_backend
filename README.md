@@ -44,6 +44,10 @@ CLOUDINARY_API_SECRET=tu_api_secret
 # JWT
 JWT_SECRET=tu_secret_super_seguro
 JWT_EXPIRES_IN=24h
+
+# Resend (notificaciones por email)
+RESEND_API_KEY=re_xxxxxxxxxx
+NOTIFICATION_EMAIL=tu@email.com
 ```
 
 ### `.env.development`
@@ -99,6 +103,43 @@ ADMIN_EMAIL=admin@tudominio.com ADMIN_PASSWORD=contraseña_segura node scripts/s
 ```
 
 Script único para poblar la base de datos en producción. Requiere `ADMIN_EMAIL` y `ADMIN_PASSWORD` como variables de entorno (no hardcodeadas). Crea el usuario admin, proyectos, servicios, tecnologías, experiencias y contactos de ejemplo. Usa `findOrCreate`, así que es seguro ejecutarlo múltiples veces.
+
+## Deploy
+
+### Stack de producción
+
+| Componente | Servicio |
+|---|---|
+| Hosting | Fly.io (`portafolio-backend-divine-ember-2765`) |
+| Base de datos | Supabase (PostgreSQL) |
+| Almacenamiento de imágenes | Cloudinary |
+
+### Endpoints en producción
+
+| Recurso | URL |
+|---|---|
+| API Base | `https://portafolio-backend-divine-ember-2765.fly.dev` |
+| Login | `POST /auth/login` |
+| Proyectos | `GET /projects` |
+| Servicios | `GET /services` |
+| Tecnologías | `GET /technologies` |
+| Experiencias | `GET /experiences` |
+
+### Variables de entorno (Fly.io secrets)
+
+```bash
+fly secrets set DB_HOST=<host> DB_PORT=6543 DB_USER=<user> DB_PASSWORD=<password> DB_DATABASE=portafolio_javier_urbina JWT_SECRET=<secret> CORS_ORIGIN=* RESEND_API_KEY=re_xxxxxxxxxx NOTIFICATION_EMAIL=urbinarathgeb@gmail.com
+```
+
+> **Importante:** Se requiere `pnpm-workspace.yaml` con `allowBuilds: { bcrypt: true }` para construir el binario nativo de bcrypt en el build de Docker.
+
+### Seed de producción
+
+```bash
+fly ssh console -C "sh -c 'ADMIN_EMAIL=admin@tudominio.com ADMIN_PASSWORD=contraseña_segura node /app/scripts/seed-prod.js'"
+```
+
+> El seed usa `findOrCreate`, es seguro ejecutarlo múltiples veces.
 
 ## Cómo probar
 
@@ -185,7 +226,7 @@ Este backend adapta los requerimientos de una clínica médica a un **portafolio
 
 | Método | Ruta | Descripción | Status | Acceso |
 |---|---|---|---|---|
-| `POST` | `/contacts` | Enviar un mensaje de contacto (soporta `company` e `interest`) | 201 / 400 | Público |
+| `POST` | `/contacts` | Enviar un mensaje de contacto (soporta `company` e `interest`). Envía notificación por email vía Resend | 201 / 400 | Público |
 | `GET` | `/contacts` | Listar todos los mensajes de contacto | 200 | Privado (JWT) |
 | `PATCH` | `/contacts/:id` | Marcar mensaje como leído | 200 / 404 | Privado (JWT) |
 
@@ -346,6 +387,7 @@ src/
 │   ├── auth.service.js                 # Lógica de autenticación (login, verificación JWT)
 │   ├── cloudinary.service.js           # Servicio de subida de archivos a Cloudinary (stream upload)
 │   ├── contact.service.js              # Lógica de negocio de contacts
+│   ├── email.service.js                # Envío de notificaciones por email (Resend)
 │   ├── experience.service.js           # Lógica de negocio de experiences
 │   ├── profile.service.js              # Lógica de negocio de profile
 │   ├── project.service.js              # Lógica de negocio de projects
@@ -455,3 +497,4 @@ Validación en dos capas:
 - **cloudinary** - SDK para almacenamiento y administración de archivos en Cloudinary
 - **jsonwebtoken** - Generación y verificación de tokens JWT
 - **bcrypt** - Hashing de contraseñas
+- **resend** - SDK para envío de notificaciones por email

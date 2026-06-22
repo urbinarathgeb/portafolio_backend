@@ -1,5 +1,6 @@
 import Contact from '../models/contact.model.js';
 import { NotFoundError } from '../utils/errors.js';
+import { sendContactNotification } from './email.service.js';
 
 export const getAll = async () => {
   return await Contact.findAll({
@@ -8,7 +9,9 @@ export const getAll = async () => {
 };
 
 export const create = async (data) => {
-  return await Contact.create(data);
+  const contact = await Contact.create(data);
+  sendContactNotification(contact).catch(() => {});
+  return contact;
 };
 
 export const markAsRead = async (id) => {
