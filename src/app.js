@@ -50,7 +50,7 @@ async function start() {
       await seed();
     }
 
-    app.listen(env.PORT, () => {
+    app.listen(env.PORT, '0.0.0.0', () => {
       console.log(`✅ Servidor corriendo en el puerto ${env.PORT}`);
     });
   } catch (error) {

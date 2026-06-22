@@ -1,0 +1,20 @@
+node_modules/
+dist/
+build/
+.env
+.env.*
+.rest-client.env.json
+!.env.example
+.idea/
+.vscode/
+*.log
+.DS_Store
+thumbs.db
+coverage/
+.npm/
+
+# Agent/opencode config
+.agents/
+AGENTS.md
+skills-lock.json
+.opencode/
