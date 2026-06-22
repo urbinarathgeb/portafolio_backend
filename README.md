@@ -92,6 +92,14 @@ pnpm start    # Levanta el servidor en modo producción (NODE_ENV=production)
 
 > **Nota:** En modo desarrollo (`pnpm dev`), las tablas se recrean y se ejecutan los seeders automáticamente en cada inicio (`sequelize.sync({ force: true })`). En producción solo se crean si no existen.
 
+### Seed de producción
+
+```bash
+ADMIN_EMAIL=admin@tudominio.com ADMIN_PASSWORD=contraseña_segura node scripts/seed-prod.js
+```
+
+Script único para poblar la base de datos en producción. Requiere `ADMIN_EMAIL` y `ADMIN_PASSWORD` como variables de entorno (no hardcodeadas). Crea el usuario admin, proyectos, servicios, tecnologías, experiencias y contactos de ejemplo. Usa `findOrCreate`, así que es seguro ejecutarlo múltiples veces.
+
 ## Cómo probar
 
 El proyecto incluye archivos `.http` para testing manual en `requests/`. Compatibles con **WebStorm** (HTTP Client) y **VS Code** (REST Client).
