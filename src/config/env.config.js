@@ -21,6 +21,7 @@ export default {
   DB_PASSWORD: required('DB_PASSWORD'),
   DB_DATABASE: required('DB_DATABASE'),
   ALLOW_EXIT_ON_IDLE: process.env.ALLOW_EXIT_ON_IDLE === 'true',
+  ALLOW_FORCE_SYNC: process.env.ALLOW_FORCE_SYNC || 'false',
 
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',

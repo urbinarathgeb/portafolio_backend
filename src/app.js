@@ -44,7 +44,8 @@ async function start() {
   try {
     await testConnection();
 
-    await sequelize.sync({force: env.NODE_ENV === 'development'});
+    const forceSync = env.NODE_ENV === 'development' && env.ALLOW_FORCE_SYNC === 'true';
+    await sequelize.sync({force: forceSync});
 
     if (env.NODE_ENV === 'development') {
       await seed();
