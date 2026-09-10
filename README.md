@@ -2,10 +2,18 @@
 
 Backend para el portafolio de Javier Urbina. API REST construida con **Express 5** y **Sequelize** sobre **PostgreSQL**.
 
+> ## 📦 Estado: archivado
+>
+> Este backend fue el proyecto final del bootcamp (Módulo 8) y alimentó el portafolio hasta septiembre de 2026, con un panel admin para editar el contenido. **Ya no está en uso** y su infraestructura (Fly.io, Supabase y Cloudinary) se dio de baja.
+>
+> **Por qué:** el contenido del portafolio cambia pocas veces al año y siempre lo edita su autor. Mantener una API, una base de datos y un panel admin agregaba latencia (cold start del plan gratuito) y puntos de falla sin aportar nada al visitante. El [frontend](https://github.com/urbinarathgeb/portafolio_frontend) ahora guarda el contenido en archivos del repo, validados con Zod, y se genera como sitio estático. El formulario de contacto envía el email directo con Resend desde una función serverless.
+>
+> El repo se conserva como evidencia de trabajo: arquitectura en capas, validación, manejo de errores, JWT, subida de archivos y soft delete. Se puede levantar en local con un PostgreSQL propio (ver abajo).
+
 ## Requisitos
 
-- Node.js >= 18
-- pnpm >= 11
+- Node.js 22+ (el `Dockerfile` usa 24.9)
+- pnpm 11
 - PostgreSQL
 
 ## Instalación
@@ -26,7 +34,10 @@ El proyecto usa tres archivos `.env`:
 
 ### `.env`
 
-Crear un archivo `.env` en la raíz del proyecto:
+Crear un archivo `.env` en la raíz del proyecto (hay una plantilla en `.env.example`).
+
+- **Obligatorias** (sin ellas el servidor no arranca): `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_DATABASE` y `JWT_SECRET`.
+- **Opcionales:** sin Cloudinary, solo falla la subida de imágenes; sin `RESEND_API_KEY` / `NOTIFICATION_EMAIL`, los contactos se guardan igual pero no se envía el aviso por email (queda un warning en consola).
 
 ```env
 DB_HOST=localhost
@@ -94,7 +105,9 @@ pnpm dev      # Levanta el servidor en modo desarrollo (NODE_ENV=development)
 pnpm start    # Levanta el servidor en modo producción (NODE_ENV=production)
 ```
 
-> **Nota:** En modo desarrollo (`pnpm dev`), las tablas se recrean y se ejecutan los seeders automáticamente en cada inicio (`sequelize.sync({ force: true })`). En producción solo se crean si no existen.
+> **Nota:** Al iniciar, `sequelize.sync()` crea las tablas que no existan. En desarrollo (`pnpm dev`) además corre el seeder inicial, que usa `findOrCreate` y no duplica datos.
+>
+> ⚠️ Las tablas **solo se borran y se recrean** (`sync({ force: true })`) con `NODE_ENV=development` **y** `ALLOW_FORCE_SYNC=true`. Es una doble guarda para no borrar datos por accidente.
 
 ### Seed de producción
 
@@ -104,26 +117,18 @@ ADMIN_EMAIL=admin@tudominio.com ADMIN_PASSWORD=contraseña_segura node scripts/s
 
 Script único para poblar la base de datos en producción. Requiere `ADMIN_EMAIL` y `ADMIN_PASSWORD` como variables de entorno (no hardcodeadas). Crea el usuario admin, proyectos, servicios, tecnologías, experiencias y contactos de ejemplo. Usa `findOrCreate`, así que es seguro ejecutarlo múltiples veces.
 
-## Deploy
+## Deploy (histórico — dado de baja)
 
-### Stack de producción
+> La infraestructura de esta sección **ya no existe**. Queda documentada como referencia de cómo estaba desplegado. El `Dockerfile` y `fly.toml` siguen en el repo por si se quiere volver a desplegar.
+
+### Stack de producción (hasta septiembre de 2026)
 
 | Componente | Servicio |
 |---|---|
-| Hosting | Fly.io (`portafolio-backend-divine-ember-2765`) |
+| Hosting | Fly.io (Docker, máquina con auto-stop) |
 | Base de datos | Supabase (PostgreSQL) |
 | Almacenamiento de imágenes | Cloudinary |
-
-### Endpoints en producción
-
-| Recurso | URL |
-|---|---|
-| API Base | `https://portafolio-backend-divine-ember-2765.fly.dev` |
-| Login | `POST /auth/login` |
-| Proyectos | `GET /projects` |
-| Servicios | `GET /services` |
-| Tecnologías | `GET /technologies` |
-| Experiencias | `GET /experiences` |
+| Emails | Resend |
 
 ### Variables de entorno (Fly.io secrets)
 
@@ -481,6 +486,14 @@ Validación en dos capas:
 - **Helmet** — Middleware de seguridad que configura headers HTTP para proteger contra vulnerabilidades web comunes (XSS, clickjacking, MIME sniffing, etc.). Se aplica globalmente en `src/app.js` con configuración por defecto.
 - **Morgan** — Logger de requests HTTP en formato `dev` para monitorear todas las peticiones entrantes en consola.
 - **Rate limiting** — `POST /auth/login` limitado a 10 intentos por IP en una ventana de 15 minutos mediante `express-rate-limit`. Configuración en `src/middlewares/rateLimiter.middleware.js`.
+
+## Limitaciones conocidas
+
+Quedan documentadas porque el proyecto está archivado y no se van a corregir:
+
+- **Email de contacto sin escapar:** `src/services/email.service.js` inserta los campos del formulario (`name`, `company`, `message`) directo en el HTML del email, así que es posible inyectar HTML en el aviso. La versión nueva del frontend escapa todos los campos.
+- **Sin tests automatizados:** la verificación de los endpoints es manual, con los archivos `.http` de `requests/`.
+- **Rate limiting en memoria:** `express-rate-limit` usa el store por defecto, así que el límite no se comparte entre instancias.
 
 ## Stack
 
